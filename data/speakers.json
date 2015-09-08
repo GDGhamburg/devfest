@@ -1,0 +1,130 @@
+[{
+    "id": 1,
+    "name": "Alexander Surma",
+    "title": "Developer Programs Engineer",
+    "company": "Google",
+    "country": "UK",
+    "photoUrl": "../../images/people/surma.jpg",
+    "bio": "Surma is an engineer working with the Chrome team. He likes to cut himself on the bleeding edge, goes full-stack every once in a while and prefers good code over functional one.",
+    "tags": ["Web"],
+    "badges": [],
+    "socials": [{
+        "name": "Google+",
+        "link": "https://plus.google.com/+AlexanderSurma"
+    }, {
+        "name": "Twitter",
+        "link": "https://twitter.com/surmair"
+    }]
+}, {
+    "id": 2,
+    "name": "Awesome Speaker",
+    "title": "Backend Developer",
+    "company": "Company",
+    "country": "Great Britain",
+    "photoUrl": "../../images/people/android.jpg",
+    "bio": "",
+    "tags": ["Cloud"],
+    "badges": [{
+        "name": "GDE",
+        "description": "Android Google Developer Expert",
+        "link": "https://developers.google.com/experts/"
+    }, {
+        "name": "GDG",
+        "description": "Google Developers Group Hamburg",
+        "link": "http://www.meetup.com/Google-Developer-Group-Hamburg/"
+    }],
+    "socials": [{
+        "name": "Website",
+        "link": ""
+    }, {
+        "name": "Twitter",
+        "link": ""
+    }, {
+        "name": "GitHub",
+        "link": ""
+    }]
+}, {
+    "id": 3,
+    "name": "Awesome Speaker",
+    "title": "Web Developer",
+    "company": "Company",
+    "country": "France",
+    "photoUrl": "../../images/people/android.jpg",
+    "bio": "",
+    "tags": ["Web"],
+    "badges": [{
+        "name": "GDE",
+        "description": "Chrome Google Developer Expert",
+        "link": "https://developers.google.com/experts/"
+    }],
+    "socials": [{
+        "name": "Website",
+        "link": ""
+    }, {
+        "name": "Twitter",
+        "link": ""
+    }, {
+        "name": "GitHub",
+        "link": ""
+    }]
+}, {
+    "id": 4,
+    "name": "Awesome Speaker",
+    "title": "Web Developer",
+    "company": "Company",
+    "country": "Ukraine",
+    "photoUrl": "../../images/people/android.jpg",
+    "bio": "",
+    "tags": ["Web"],
+    "badges": [],
+    "socials": [{
+        "name": "Website",
+        "link": ""
+    }, {
+        "name": "Twitter",
+        "link": ""
+    }, {
+        "name": "GitHub",
+        "link": ""
+    }]
+}, {
+    "id": 5,
+    "name": "Awesome Speaker",
+    "title": "Mobile Coder",
+    "company": "Company",
+    "country": "Spain",
+    "photoUrl": "../../images/people/android.jpg",
+    "bio": "",
+    "tags": ["Android"],
+    "badges": [],
+    "socials": [{
+        "name": "Website",
+        "link": ""
+    }, {
+        "name": "Twitter",
+        "link": ""
+    }, {
+        "name": "GitHub",
+        "link": ""
+    }]
+}, {
+    "id": 6,
+    "name": "Awesome Speaker",
+    "title": "Frontend Developer",
+    "company": "Company",
+    "country": "USA",
+    "photoUrl": "../../images/people/android.jpg",
+    "bio": "",
+    "tags": ["Web"],
+    "badges": [],
+    "socials": [{
+        "name": "Website",
+        "link": ""
+    }, {
+        "name": "Twitter",
+        "link": ""
+    }, {
+        "name": "GitHub",
+        "link": ""
+    }]
+}]

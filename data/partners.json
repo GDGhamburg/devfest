@@ -1,0 +1,32 @@
+[   {
+        "title": "Organizers",
+        "logos": [{
+            "name": "GDG Hamburg",
+            "url": "https://developers.google.com/groups/chapter/114226021900650933814/",
+            "logoUrl": "../images/GDG_Hamburg_500.png"
+        },{
+            "name": "GDG Hamburg Android",
+            "url": "https://developers.google.com/groups/chapter/107859748046093089218/",
+            "logoUrl": "../images/GDG_Hamburg_Android_800.png"
+        },{
+            "name": "GDG Hamburg Golang",
+            "url": "https://developers.google.com/groups/chapter/103545472040309738031/",
+            "logoUrl": "../images/GDG_Hamburg_Golang.png"
+        }]
+    },
+    {
+        "title": "General sponsor",
+        "logos": [{
+            "name": "Google",
+            "url": "https://www.google.com.ua/intl/en/about/",
+            "logoUrl": "../images/partners/google.svg"
+        }]
+    }, {
+        "title": "Platinum sponsor",
+        "logos": [{
+            "name": "Xing",
+            "url": "http://xing.com",
+            "logoUrl": "../images/partners/xing.jpg"
+        }]
+    }
+]

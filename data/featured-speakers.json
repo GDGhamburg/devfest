@@ -1,0 +1,21 @@
+[{
+    "id": 1,
+    "name": "Alexander Surma",
+    "company": "Google, UK",
+    "photoUrl": "../../images/people/surma.jpg"
+}, {
+    "id": 2,
+    "name": "Awesome Speaker",
+    "company": "Company, Great Britain",
+    "photoUrl": "../../images/people/android.jpg"
+}, {
+    "id": 3,
+    "name": "Awesome Speaker",
+    "company": "Company, Ukraine",
+    "photoUrl": "../../images/people/android.jpg"
+}, {
+    "id": 4,
+    "name": "Awesome Speaker",
+    "company": "Company, Spain",
+    "photoUrl": "../../images/people/android.jpg"
+}]
