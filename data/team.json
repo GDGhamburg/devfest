@@ -2,16 +2,12 @@
     "id": 1,
     "name": "Marco Pöhler",
     "title": "Freelancer & Geschäftsführer",
-    "company": "GDG Hamburg / Kontaktlinsen Preisvergleich",
-    "country": "",
+    "chapter": "GDG Hamburg",
+    "company": "Kontaktlinsen Preisvergleich",
     "photoUrl": "../../images/people/marco.jpg",
     "bio": "Software-Developer with strong online marketing focus. Created some successful price comparison websites which enables him to spend most of his time exploring new web technologies or repairing his old car (A Dodge Charger from 1972).",
-    "tags": [],
-    "badges": [{
-        "name": "GDG",
-        "description": "GDG Hamburg",
-        "link": "http://www.meetup.com/Google-Developer-Group-Hamburg/"
-    }],
+    "tags": ["Polymer", "Web"],
+    "badges": [],
     "socials": [{
         "name": "Google+",
         "link": "https://plus.google.com/+MarcoPöhler"
@@ -26,16 +22,13 @@
     "id": 2,
     "name": "Matthias Friedrich",
     "title": "Android Developer",
-    "company": "GDG Hamburg Android / Jimdo",
+    "chapter": "GDG Hamburg Android",
+    "company": "Jimdo",
     "country": "",
     "photoUrl": "../../images/people/matthias.jpg",
-    "bio": "",
-    "tags": [],
-    "badges": [{
-        "name": "GDG",
-        "description": "GDG Hamburg Android",
-        "link": "http://www.meetup.com/Google-Developer-Group-Hamburg/"
-    }],
+    "bio": "As Android user from the beginning, he started to develop for the platform with version 1.6 in 2009. Since then he is following its progress very enthusiastically and worked on several applications, big and small, successful in the Play Store and as specialized customer solutions . During these years, he also co-founded the GDG Bremen and GDG Hamburg Android, gave several Android related talks and organized developer events around Google technologies in general.",
+    "tags": ["Android Wear", "AndroidTV", "UI"],
+    "badges": [],
     "socials": [{
         "name": "Google+",
         "link": "https://google.com/+MatthiasFriedrich"
@@ -50,16 +43,13 @@
     "id": 3,
     "name": "Serj Lotutovici",
     "title": "Android Developer",
+    "chapter": "GDG Hamburg Android",
     "company": "Xing",
     "country": "",
     "photoUrl": "../../images/people/serj.jpg",
     "bio": "",
-    "tags": ["Web"],
-    "badges": [{
-        "name": "GDG",
-        "description": "GDG Hamburg Android",
-        "link": "http://www.meetup.com/Google-Developer-Group-Hamburg/"
-    }],
+    "tags": ["Architecture"],
+    "badges": [],
     "socials": [{
         "name": "Google+",
         "link": "https://google.com/+LotutoviciSerj"
@@ -71,16 +61,13 @@
     "id": 4,
     "name": "Ingo Oeser",
     "title": "Developer",
-    "company": "GDG Hamburg Golang / Jimdo",
+    "chapter": "GDG Hamburg Golang",
+    "company": "Jimdo",
     "country": "",
     "photoUrl": "../../images/people/ingo.png",
     "bio": "",
-    "tags": [],
-    "badges": [{
-        "name": "GDG",
-        "description": "GDG Hamburg Golang",
-        "link": "http://www.meetup.com/Go-User-Group-Hamburg/"
-    }],
+    "tags": ["Go"],
+    "badges": [],
     "socials": [{
         "name": "Google+",
         "link": "https://google.com/+IngoOeser"
@@ -92,16 +79,13 @@
     "id": 5,
     "name": "Martin Thielecke",
     "title": "Developer",
-    "company": "GDG Hamburg / veeseo",
+    "chapter": "GDG Hamburg Golang",
+    "company": "veeseo",
     "country": "",
     "photoUrl": "../../images/people/martin.jpg",
     "bio": "",
-    "tags": [],
-    "badges": [{
-        "name": "GDG",
-        "description": "GDG Hamburg Golang",
-        "link": "http://www.meetup.com/Go-User-Group-Hamburg/"
-    }],
+    "tags": ["Go", "Web"],
+    "badges": [],
     "socials": [{
         "name": "Google+",
         "link": "https://google.com/+MartinThielecke"
@@ -113,16 +97,13 @@
     "id": 6,
     "name": "Björn Jensen",
     "title": "",
+    "chapter": "GDG Hamburg Android",
     "company": "",
     "country": "",
     "photoUrl": "../../images/people/bjoern.jpg",
     "bio": "",
-    "tags": ["Web"],
-    "badges": [{
-        "name": "GDG",
-        "description": "GDG Hamburg Android",
-        "link": "http://www.meetup.com/Go-User-Group-Hamburg/"
-    }],
+    "tags": [],
+    "badges": [],
     "socials": [{
         "name": "Google+",
         "link": "https://google.com/+BjörnJensen_hh"
