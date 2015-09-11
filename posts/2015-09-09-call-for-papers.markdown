@@ -1,5 +1,7 @@
 GDG DevFest Hamburg 2015 will be held on **November 5-6** at the Betahaus Hamburg. If you want to be a speaker at this great event, here is your chance.
 
+### Think out of the box, create ...and share!
+
 
 ### Presenters – who should speak at the DevFest Conference?
 

@@ -11,3 +11,5 @@ Like last year, the event will be held on **5-6 November at the Bethaus Hamburg*
 As a announcement bonus we are very happy that we already can announce our first speaker: [Surma](https://plus.google.com/+AlexanderSurma). As a native "Hamburger" and former GDG Organizer of GDG Berlin Golang and now Developer Relations Engineer at Google in London, we are especially pleased for him giving a presentation about [HTTP/2 for developers](http://www.devfest.de/#!/speakers/1) at this years event! But stay tuned, there are more to come...
 
 P.S. if you are also interested to join us as a speaker, feel free to [apply](http://goo.gl/forms/MDTttSCkgr). 
+
+### Think out of the box, create ...and share!

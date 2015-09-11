@@ -65,7 +65,7 @@
     "company": "Jimdo",
     "country": "",
     "photoUrl": "../../images/people/ingo.png",
-    "bio": "",
+    "bio": "Night owl who loves reading lots of code, science fiction and fantasy. Writing Go code for fun and profit.",
     "tags": ["Go"],
     "badges": [],
     "socials": [{
@@ -74,6 +74,9 @@
     }, {
         "name": "GitHub",
         "link": "https://github.com/nightlyone"
+    }, {
+        "name": "Twitter",
+        "link": "https://twitter.com/nightlyone"
     }]
 }, {
     "id": 5,
@@ -92,6 +95,23 @@
     }, {
         "name": "Website",
         "link": "http://www.mthie.com"
+    }]
+}, {
+    "id": 7,
+    "name": "Inga Breuer",
+    "title": "Software Developer",
+    "chapter": "GDG Member",
+    "company": "Fuse",
+    "photoUrl": "../../images/people/inga.png",
+    "bio": "",
+    "tags": ["Android"],
+    "badges": [],
+    "socials": [{
+        "name": "Google+",
+        "link": "https://plus.google.com/110302548402901939726"
+    }, {
+        "name": "Twitter",
+        "link": "https://twitter.com/ingabreuer22"
     }]
 }, {
     "id": 6,
