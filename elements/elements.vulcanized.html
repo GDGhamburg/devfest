@@ -7287,6 +7287,27 @@ Example:
   /** @polymerBehavior */
   Polymer.IronSelectableBehavior = {
 
+      /**
+       *  Fired when iron-selector is activated (selected or deselected).
+       *  It is fired before the selected items are changed.
+       *  Cancel the event to abort selection.
+       *
+       * @event iron-activate
+       *
+       **/
+      /**
+       *  Fired when an item is selected
+       *
+       * @event iron-select
+       *
+       **/
+      /**
+       *  Fired when an item is deselected
+       *
+       * @event iron-deselect
+       *
+       **/
+
     properties: {
 
       /**
@@ -7340,7 +7361,7 @@ Example:
       },
 
       /**
-       * This is a CSS selector sting.  If this is set, only items that matches the CSS selector
+       * This is a CSS selector string.  If this is set, only items that match the CSS selector
        * are selectable.
        *
        * @attribute selectable
@@ -7368,17 +7389,29 @@ Example:
       selectedAttribute: {
         type: String,
         value: null
-      }
+      },
 
+      /**
+       * The set of excluded elements where the key is the `localName` 
+       * of the element that will be ignored from the item list.
+       *
+       * @type {object}
+       * @default {template: 1}
+       */
+
+      excludedLocalNames: {
+        type: Object,
+        value: function() {
+          return {
+            'template': 1
+          };
+        }
+      }
     },
 
     observers: [
       '_updateSelected(attrForSelected, selected)'
     ],
-
-    excludedLocalNames: {
-      'template': 1
-    },
 
     created: function() {
       this._bindFilterItem = this._filterItem.bind(this);
@@ -7458,9 +7491,7 @@ Example:
     },
 
     _removeListener: function(eventName) {
-      // There is no unlisten yet...
-      // https://github.com/Polymer/polymer/issues/1639
-      //this.removeEventListener(eventName, this._bindActivateHandler);
+      this.unlisten(this, eventName, '_activateHandler');
     },
 
     _activateEventChanged: function(eventName, old) {
@@ -7549,11 +7580,6 @@ Example:
     },
 
     _activateHandler: function(e) {
-      // TODO: remove this when https://github.com/Polymer/polymer/issues/1639 is fixed so we
-      // can just remove the old event listener.
-      if (e.type !== this.activateEvent) {
-        return;
-      }
       var t = e.target;
       var items = this.items;
       while (t && t != this) {
@@ -14287,6 +14313,11 @@ is separate from validation, and `allowed-pattern` does not affect how the input
   Polymer.PaperInputBehaviorImpl = {
 
     properties: {
+      /**
+       * Fired when the input changes due to user interaction.
+       *
+       * @event change
+       */
 
       /**
        * The label for this input. Bind this to `<paper-input-container>`'s `label` property.
@@ -14657,6 +14688,19 @@ is separate from validation, and `allowed-pattern` does not affect how the input
         label.id = labelledBy;
       }
       this._ariaLabelledBy = labelledBy;
+    },
+
+    _onChange:function(event) {
+      // In the Shadow DOM, the `change` event is not leaked into the
+      // ancestor tree, so we must do this manually.
+      // See https://w3c.github.io/webcomponents/spec/shadow/#events-that-are-not-leaked-into-ancestor-trees.
+      if (this.shadowRoot) {
+        this.fire(event.type, {sourceEvent: event}, {
+          node: this,
+          bubbles: event.bubbles,
+          cancelable: event.cancelable
+        });
+      }
     }
 
   };
@@ -18555,15 +18599,17 @@ Configuration:
     _constructServiceWorkerUrl: function() {
       var paramsPromises = [];
       var children = Polymer.dom(this).children;
+      var baseUri = new URL(this.baseUri, window.location.href);
+
       for (var i = 0; i < children.length; i++) {
         if (typeof children[i]._getParameters === 'function') {
-          paramsPromises.push(children[i]._getParameters(this.baseUri));
+          paramsPromises.push(children[i]._getParameters(baseUri));
         }
       }
 
       return Promise.all(paramsPromises).then(function(paramsResolutions) {
         var params = {
-          baseURI: this.baseUri,
+          baseURI: baseUri,
           version: this._version
         };
 
@@ -20773,6 +20819,10 @@ module.exports = Array.isArray || function (arr) {
       overflow: auto;
     }
 
+    :host(:not(.has-scroller)) {
+      position: relative;
+    }
+
     #items {
       position: relative;
     }
@@ -20906,7 +20956,7 @@ module.exports = Array.isArray || function (arr) {
 
     /**
      * The ratio of hidden tiles that should remain in the scroll direction.
-     * Recommended value ≈ 0.5, so it will distribute tiles evely in both directions.
+     * Recommended value ~0.5, so it will distribute tiles evely in both directions.
      */
     _ratio: 0.5,
 
@@ -20977,9 +21027,14 @@ module.exports = Array.isArray || function (arr) {
     _physicalIndexForKey: null,
 
     /**
-     * The average scroll size
+     * The estimated scroll height based on `_physicalAverage`
      */
-    _scrollSize: 0,
+    _estScrollHeight: 0,
+
+    /**
+     * The scroll height of the dom node
+     */
+    _scrollHeight: 0,
 
     /**
      * The size of the viewport
@@ -21051,7 +21106,7 @@ module.exports = Array.isArray || function (arr) {
      * The maximum scroll top value.
      */
     get _maxScrollTop() {
-      return this._scrollSize - this._viewportSize;
+      return this._estScrollHeight - this._viewportSize;
     },
 
     /**
@@ -21480,6 +21535,10 @@ module.exports = Array.isArray || function (arr) {
       }
     },
 
+    /**
+     * Called when the items have changed. That is, ressignments
+     * to `items`, splices or updates to a single item.
+     */
     _itemsChanged: function(change) {
       if (change.path === 'items') {
         // render the new set
@@ -21543,6 +21602,10 @@ module.exports = Array.isArray || function (arr) {
       this._refresh();
     },
 
+    /**
+     * Executes a provided function per every physical index in `itemSet`
+     * `itemSet` default value is equivalent to the entire set of physical indexes.
+     */
     _iterateItems: function(fn, itemSet) {
       var pidx, vidx, rtn, i;
 
@@ -21578,6 +21641,9 @@ module.exports = Array.isArray || function (arr) {
       }
     },
 
+    /**
+     * Assigns the data models to a given set of items.
+     */
     _assignModels: function(itemSet) {
       this._iterateItems(function(pidx, vidx) {
         var el = this._physicalItems[pidx];
@@ -21599,6 +21665,9 @@ module.exports = Array.isArray || function (arr) {
       }, itemSet);
     },
 
+    /**
+     * Updates the height for a given set of items.
+     */
     _updateMetrics: function() {
       var total = 0;
       var prevAvgCount = this._physicalAverageCount;
@@ -21624,6 +21693,9 @@ module.exports = Array.isArray || function (arr) {
       }
     },
 
+    /**
+     * Updates the position of the physical items.
+     */
     _positionItems: function(itemSet) {
       this._adjustScrollPosition();
 
@@ -21637,6 +21709,9 @@ module.exports = Array.isArray || function (arr) {
       }, itemSet);
     },
 
+    /**
+     * Adjusts the scroll position when it was overestimated.
+     */
     _adjustScrollPosition: function() {
       var deltaHeight = this._virtualStartVal === 0 ? this._physicalTop :
           Math.min(this._scrollPosition + this._physicalTop, 0);
@@ -21651,6 +21726,9 @@ module.exports = Array.isArray || function (arr) {
       }
     },
 
+    /**
+     * Sets the position of the scroll.
+     */
     _resetScrollPosition: function(pos) {
       if (this._scroller) {
         this._scroller.scrollTop = pos;
@@ -21658,11 +21736,21 @@ module.exports = Array.isArray || function (arr) {
       }
     },
 
-    _updateScrollerSize: function() {
-      this._scrollSize = (this._physicalBottom +
+    /**
+     * Sets the scroll height, that's the height of the content,
+     */
+    _updateScrollerSize: function(forceUpdate) {
+      this._estScrollHeight = (this._physicalBottom +
           Math.max(this._virtualCount - this._physicalCount - this._virtualStartVal, 0) * this._physicalAverage);
 
-      this.$.items.style.height = this._scrollSize + 'px';
+      forceUpdate = forceUpdate || this._scrollHeight === 0;
+      forceUpdate = forceUpdate || this._scrollPosition >= this._estScrollHeight - this._physicalSize;
+
+      // amortize height adjustment, so it won't trigger repaints very often
+      if (forceUpdate || Math.abs(this._estScrollHeight - this._scrollHeight) >= this._optPhysicalSize) {
+        this.$.items.style.height = this._estScrollHeight + 'px';
+        this._scrollHeight = this._estScrollHeight;
+      }
     },
 
     /**
@@ -21708,7 +21796,7 @@ module.exports = Array.isArray || function (arr) {
       }
 
       // update the scroller size
-      this._updateScrollerSize();
+      this._updateScrollerSize(true);
 
       // update the position of the items
       this._positionItems();
@@ -21848,8 +21936,8 @@ module.exports = Array.isArray || function (arr) {
       } else if (this.selectedItem) {
         unselect.call(this, this.selectedItem);
       }
-     
-      this.$.selector.clearSelection();    
+
+      this.$.selector.clearSelection();
     },
 
     /**
@@ -26614,7 +26702,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       <label hidden$="[[!label]]">[[label]]</label>
 
-      <input is="iron-input" id="input" aria-labelledby$="[[_ariaLabelledBy]]" aria-describedby$="[[_ariaDescribedBy]]" disabled$="[[disabled]]" bind-value="{{value}}" invalid="{{invalid}}" prevent-invalid-input="[[preventInvalidInput]]" allowed-pattern="[[allowedPattern]]" validator="[[validator]]" type$="[[type]]" pattern$="[[pattern]]" required$="[[required]]" autocomplete$="[[autocomplete]]" autofocus$="[[autofocus]]" inputmode$="[[inputmode]]" minlength$="[[minlength]]" maxlength$="[[maxlength]]" min$="[[min]]" max$="[[max]]" step$="[[step]]" name$="[[name]]" placeholder$="[[placeholder]]" readonly$="[[readonly]]" list$="[[list]]" size$="[[size]]" autocapitalize$="[[autocapitalize]]" autocorrect$="[[autocorrect]]">
+      <input is="iron-input" id="input" aria-labelledby$="[[_ariaLabelledBy]]" aria-describedby$="[[_ariaDescribedBy]]" disabled$="[[disabled]]" bind-value="{{value}}" invalid="{{invalid}}" prevent-invalid-input="[[preventInvalidInput]]" allowed-pattern="[[allowedPattern]]" validator="[[validator]]" type$="[[type]]" pattern$="[[pattern]]" required$="[[required]]" autocomplete$="[[autocomplete]]" autofocus$="[[autofocus]]" inputmode$="[[inputmode]]" minlength$="[[minlength]]" maxlength$="[[maxlength]]" min$="[[min]]" max$="[[max]]" step$="[[step]]" name$="[[name]]" placeholder$="[[placeholder]]" readonly$="[[readonly]]" list$="[[list]]" size$="[[size]]" autocapitalize$="[[autocapitalize]]" autocorrect$="[[autocorrect]]" on-change="_onChange">
 
       <content select="[suffix]"></content>
 
@@ -27330,8 +27418,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       paper-material {
         border-radius: inherit;
-        width: 100%;
-        height: 100%;
+        @apply(--layout-fit);
       }
 
       /* IE 10 support for HTML5 hidden attr */
@@ -27378,16 +27465,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
     </style>
 
-    <paper-material animated$="[[animatedShadow]]" elevation="[[elevation]]">
-      <div class="header">
-        <img hidden$="[[!image]]" src="[[image]]">
-        <div hidden$="[[!heading]]" class$="[[_computeHeadingClass(image)]]">[[heading]]</div>
-      </div>
+    <paper-material animated$="[[animatedShadow]]" elevation="[[elevation]]"></paper-material>
 
-      <content></content>
+    <div class="header">
+      <img hidden$="[[!image]]" src="[[image]]">
+      <div hidden$="[[!heading]]" class$="[[_computeHeadingClass(image)]]">[[heading]]</div>
+    </div>
 
-    </paper-material>
-
+    <content></content>
   </template>
 
 </dom-module>
@@ -30389,7 +30474,7 @@ Polymer({
                     </div>
                 </div>
             </template>
-            <a href="mailto:gdghhandroid@gmail.com" class="block-link" target="_blank" onclick="ga('send', 'become-a-partner', 'button', 'click');">
+            <a data-route="blog/sponsorship" href="#!/blog/sponsorship" class="block-link" target="_blank" onclick="ga('send', 'become-a-partner', 'button', 'click');">
                 <paper-button class="colorful" raised="">Become a partner</paper-button>
             </a>
         </div>
@@ -30621,7 +30706,7 @@ Polymer({
                     <div class="flex link-block-wrapper">
                         <span class="link-block-title block">For partners</span>
                         <ul class="link-block">
-                            <li><a href="mailto:gdghhandroid@gmail.com" target="_blank">Partnership Proposition</a></li>
+                            <li><a data-route="blog/sponsorship" href="#!/blog/sponsorship" target="_blank">Sponsorship</a></li>
                             <!-- <li><a href="" target="_blank">Media Kit</a></li> -->
                         </ul>
                     </div>
