@@ -31,7 +31,7 @@ We prepared some possible packages for you that you can choose to support this b
  * Being mentioned as a sponsor in our social network postings (f.e. Google+, Twitter, Meetup, XING)
  * Being mentioned as a sponsor in the Devfest welcome session
 
-* **A LL THE OTHER METALS - custom** (?€)
+* **ALL THE OTHER METALS - custom** (?€)
  * Of course it is also possible to directly support us with physical goods. This could f.e. be things for the goodie bags, sponsored coffee breaks, snacks or the first round of drinks for the After-Show-Party. Catering sponsorships can be billed to you directly by the Betahaus Hamburg or other service providers. Just get in contact with us! 
 
 All sponsorships are liable to VAT.
