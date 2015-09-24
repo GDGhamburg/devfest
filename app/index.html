@@ -78,7 +78,7 @@
                     <a data-route="#!/home" href="/">Home</a>
                     <a data-route="#!/blog" href="/blog">Blog</a>
                     <a data-route="#!/speakers" href="/speakers">Speakers</a>
-                    <!-- <a data-route="#!/team" href="/team">Team</a> -->
+                    <a data-route="#!/team" href="/team">Team</a>
                     <!-- <a data-route="contact" href="/contact">Contact</a> -->
                 </paper-menu>
             </paper-header-panel>
@@ -97,15 +97,15 @@
                                             <p class="slogan">Think out of the box, create ...and share!</p>
                                             <div class="links layout horizontal align-pb-block">
                                                 <a href="http://goo.gl/forms/MDTttSCkgr" target="_blank">
-                                                    <paper-button noink raised class="colorful">
+                                                    <paper-button class="colorful" raised>
                                                         Become a speaker
                                                     </paper-button>
                                                 </a>
-                                                <!-- <a href="#pricetable">
+                                                <a href="#pricetable">
                                                     <paper-button class="colorful" raised>
-                                                        Register
+                                                        Tickets
                                                     </paper-button>
-                                                </a> -->
+                                                </a>
                                             </div>
                                         </div>
                                         <div class="flex relative right-section">
@@ -124,10 +124,10 @@
                             </featured-people>
                             <!-- <call-to-action></call-to-action> -->
                             <photo-block></photo-block>
-                            <!-- <tickets-block></tickets-block> -->
                             <latest-news source="../../data/blog.json"></latest-news>
                             <!-- <social-feed source="http://lviv.gdg.org.ua/tweetledee/favoritesjson.php?c=10&cache_interval=7200"></social-feed> -->
                             <map-block></map-block>
+                            <tickets-block></tickets-block>
                             <logos-block source="../../data/partners.json">
                                 <h4 class="heading">Partners</h4>
                             </logos-block>
