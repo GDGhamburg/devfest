@@ -33297,6 +33297,7 @@ Polymer({
                 margin-top: 21px;
                 display: inline-block;
                 vertical-align: top;
+                font-size: 20px;
             }
 
             .price {
@@ -33310,7 +33311,7 @@ Polymer({
 
             .additional-info {
                 margin-top: -5px;
-                font-size: 13px;
+                font-size: 16px;
             }
 
             .open-dialog-button {
@@ -33335,39 +33336,33 @@ Polymer({
             <h4 class="heading">Tickets</h4>
             <div class="price-block-wrapper flex layout vertical-horizontal">
                 <div class="price-block flex text-center">
-                    <span class="ticket-name block">Student</span>
-                    <span class="price">400</span>
-                    <span class="currency">UAH</span>
-                    <span class="additional-info block">*Before October 23 or 100 tickets.
-                        <br>Requires valid student ID</span>
+                    <span class="ticket-name block">Codelabs (5/11)</span>
+                    <span class="price">5</span>
+                    <span class="currency">€</span>
+                    <span class="additional-info block">*75 tickets, available until November 4</span>
                 </div>
                 <div class="price-block flex text-center">
-                    <span class="ticket-name block">Early Bird</span>
-                    <span class="price">600</span>
-                    <span class="currency">UAH</span>
-                    <span class="additional-info block">*Before September 27 or 150 tickets</span>
-                </div>
-                <div class="price-block flex text-center">
-                    <span class="ticket-name block">Lazy Bird</span>
-                    <span class="price">800</span>
-                    <span class="currency">UAH</span>
-                    <span class="additional-info block">*Before October 23</span>
+                    <span class="ticket-name block">Conference (6/11)</span>
+                    <span class="price">5</span>
+                    <span class="currency">€</span>
+                    <span class="additional-info block">*200 tickets, available until November 4</span>
                 </div>
             </div>
-            <span class="details">Tickets grant access to all conference sections, coffee breaks, lunch and party. Accommodation is NOT included in the ticket price.</span>
             <div class="flex">
-                <paper-button class="white border-button open-dialog-button" on-tap="openTicketsDialog">Buy a ticket</paper-button>
+                <a href="https://goo.gl/YNpQ1u" target="_blank">
+                    <paper-button class="white border-button open-dialog-button">Register</paper-button>
+                </a>
             </div>
         </div>
-        <paper-dialog id="ticketsDialog" entry-animation="scale-up-animation" exit-animation="fade-out-animation" modal="">
+        <!-- <paper-dialog id="ticketsDialog" entry-animation="scale-up-animation" exit-animation="fade-out-animation" modal>
                 <div id="2event_tickets_widget" style="width: 640px; height: 300px; background:#fff;"></div>
             <div class="buttons">
                 <a href="http://2event.com/events/312113" target="_blank">
                     <paper-button>Buy on the website</paper-button>
                 </a>
-                <paper-button dialog-confirm="">Close</paper-button>
+                <paper-button dialog-confirm>Close</paper-button>
             </div>
-        </paper-dialog>
+        </paper-dialog> -->
     </template>
 </dom-module>
 <script>
