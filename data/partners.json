@@ -15,11 +15,15 @@
         }]
     },
     {
-        "title": "General sponsor",
+        "title": "General partners",
         "logos": [{
             "name": "Google",
-            "url": "https://www.google.com.ua/intl/en/about/",
+            "url": "https://www.google.com/intl/en/about/",
             "logoUrl": "../images/partners/google.svg"
+        },{
+            "name": "Women Techmakers",
+            "url": "https://www.womentechmakers.com/",
+            "logoUrl": "../images/partners/wtm.jpg"
         }]
     }, {
         "title": "Platinum sponsor",
