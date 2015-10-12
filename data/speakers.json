@@ -17,114 +17,127 @@
     }]
 }, {
     "id": 2,
-    "name": "Awesome Speaker",
-    "title": "Backend Developer",
-    "company": "Company",
-    "country": "Great Britain",
-    "photoUrl": "../../images/people/android.jpg",
-    "bio": "",
-    "tags": ["Cloud"],
+    "name": "Tim Roes",
+    "title": "Android- & Web-Developer",
+    "company": "inovex GmbH",
+    "country": "Germany",
+    "photoUrl": "../../images/people/tim_roes.jpg",
+    "bio": "Tim is an software developer for inovex in Karlsruhe. He mainly works in the fields of Android and web development and has a strong passion for usability and user experience. He also co-organized the GDG Karlsruhe.",
+    "tags": ["Web"],
     "badges": [{
-        "name": "GDE",
-        "description": "Android Google Developer Expert",
-        "link": "https://developers.google.com/experts/"
-    }, {
         "name": "GDG",
-        "description": "Google Developers Group Hamburg",
-        "link": "http://www.meetup.com/Google-Developer-Group-Hamburg/"
+        "description": "GDG Karlsruhe",
+        "link": "https://plus.google.com/+Gdg-karlsruheDe/"
     }],
     "socials": [{
         "name": "Website",
-        "link": ""
+        "link": "https://www.timroes.de"
     }, {
         "name": "Twitter",
-        "link": ""
+        "link": "https://twitter.com/tim_roes"
     }, {
-        "name": "GitHub",
-        "link": ""
+        "name": "Google+",
+        "link": "https://plus.google.com/+TimRoes"
     }]
 }, {
     "id": 3,
-    "name": "Awesome Speaker",
+    "name": "Kim Hogeling",
     "title": "Web Developer",
-    "company": "Company",
-    "country": "France",
-    "photoUrl": "../../images/people/android.jpg",
-    "bio": "",
+    "company": "shopping24 internet group",
+    "country": "Germany",
+    "photoUrl": "../../images/people/kim_hogeling.jpg",
+    "bio": "Kim is a happy web developer working for @shopping24. He is crazy about performance - server side as well as client side. His job is his hobby, but in his spare time he tries out new technologies and he is currently building a vanilla JS game engine. Why? Because learning is fun!",
     "tags": ["Web"],
-    "badges": [{
-        "name": "GDE",
-        "description": "Chrome Google Developer Expert",
-        "link": "https://developers.google.com/experts/"
-    }],
+    "badges": [],
     "socials": [{
         "name": "Website",
-        "link": ""
+        "link": "https://developer.s24.com/http://www.s24.com/"
+    }, {
+        "name": "Website",
+        "link": "http://www.s24.com/"
     }, {
         "name": "Twitter",
-        "link": ""
+        "link": "https://twitter.com/KimHogeling"
     }, {
         "name": "GitHub",
-        "link": ""
+        "link": "https://github.com/kimhogeling"
     }]
 }, {
     "id": 4,
-    "name": "Awesome Speaker",
-    "title": "Web Developer",
-    "company": "Company",
-    "country": "Ukraine",
-    "photoUrl": "../../images/people/android.jpg",
-    "bio": "",
+    "name": "Aygul Zagidullina",
+    "title": "",
+    "company": "Todoist",
+    "country": "Germany",
+    "photoUrl": "../../images/people/aygul.jpg",
+    "bio": "Aygul is absolutely passionate about making our world a better place through technology and science. She is community manager of two Google Developer Groups (GDGs) in Germany and Russia, Google Top Contributor (TC) for Google+ and Gmail, active member of the global Women Techmakers (WTM) community, translator, quantum chemist, classically trained musician as well as MOOC and citizen science enthusiast. When not working or contributing to the community, she enjoys traveling, learning foreign languages, and listening to good music.",
     "tags": ["Web"],
-    "badges": [],
+    "badges": [{
+        "name": "GDG",
+        "description": "GDG Stuttgart",
+        "link": "https://plus.google.com/110418713081470246659/"
+    }],
     "socials": [{
         "name": "Website",
-        "link": ""
+        "link": "http://www.aygul.de"
     }, {
-        "name": "Twitter",
-        "link": ""
+        "name": "Google+",
+        "link": "https://plus.google.com/+AygulZagidullina"
     }, {
-        "name": "GitHub",
-        "link": ""
+        "name": "LinkedIn",
+        "link": "https://www.linkedin.com/in/aygulzagidullina"
     }]
 }, {
     "id": 5,
-    "name": "Awesome Speaker",
-    "title": "Mobile Coder",
-    "company": "Company",
-    "country": "Spain",
-    "photoUrl": "../../images/people/android.jpg",
+    "name": "Hasan Hosgel",
+    "title": "Android Developer",
+    "company": "Kitchen Stories",
+    "country": "Germany",
+    "photoUrl": "../../images/people/hasan.jpg",
     "bio": "",
     "tags": ["Android"],
-    "badges": [],
+    "badges": [{
+        "name": "GDG",
+        "description": "GDG Berlin Android",
+        "link": "http://www.meetup.com/GDG-Berlin-Android/"
+    }],
     "socials": [{
         "name": "Website",
-        "link": ""
-    }, {
-        "name": "Twitter",
-        "link": ""
-    }, {
-        "name": "GitHub",
         "link": ""
     }]
 }, {
     "id": 6,
-    "name": "Awesome Speaker",
-    "title": "Frontend Developer",
-    "company": "Company",
-    "country": "USA",
-    "photoUrl": "../../images/people/android.jpg",
+    "name": "André Tietz",
+    "title": "Android Developer",
+    "company": "myTaxi (Intelligent Apps GmbH)",
+    "country": "Germany",
+    "photoUrl": "../../images/people/andré.jpg",
     "bio": "",
-    "tags": ["Web"],
-    "badges": [],
+    "tags": ["Android"],
+    "badges": [{
+        "name": "GDG",
+        "description": "GDG Hamburg Android",
+        "link": "http://www.meetup.com/Google-Developer-Group-Hamburg/"
+    }],
     "socials": [{
         "name": "Website",
-        "link": ""
-    }, {
-        "name": "Twitter",
-        "link": ""
-    }, {
-        "name": "GitHub",
-        "link": ""
+        "link": "https://www.timroes.de"
+    }]
+}, {
+    "id": 6,
+    "name": "Martin Liersch",
+    "title": "Freelance Android Developer",
+    "company": "Paradise Android",
+    "country": "Germany",
+    "photoUrl": "../../images/people/martin_liersch.jpg",
+    "bio": "I'm a passionate Android developer since I got my first Android device (Motorola Milestone). I have several apps in the Play Store, some with < 1 million downloads. I'm also a co-organizer of GDG Bodensee and a frequent speaker at Android events all over Europe.",
+    "tags": ["Android"],
+    "badges": [{
+        "name": "GDG",
+        "description": "GDG Bodensee",
+        "link": "https://plus.google.com/102863795915305230399/"
+    }],
+    "socials": [{
+        "name": "Google+",
+        "link": "https://plus.google.com/+MartinLiersch"
     }]
 }]

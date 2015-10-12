@@ -1,11 +1,11 @@
 [
   {
     "id": 101,
-    "title": "HTTP/2 for developers",
-    "description": "HTTP/2 (formerly SPDY) has been around for a while quite a while. By now, the Evergreen browsers support it and the nginx, Apache and other backends are adapting. What are the benefits? Is it relevant to you? Yes. Details in the talk.",
+    "title": "There’s an Polymer Element for that — but what if there isn't?",
+    "description": "You have your own service. It has a very nice API. Is there Polymer an element for that? Probably not! In this session we’ll talk about patterns that occur when writing your own elements while wrapping an API or while writing new visual elements.",
     "speakers": [1],
     "language": "en",
-    "complexity": "Expert",
+    "complexity": "Intermediate",
     "presentation": "",
     "video": ""
   },
@@ -14,48 +14,48 @@
     "title": "TBD",
     "description": "",
     "speakers": [2],
-    "language": "en",
-    "complexity": "Beginner",
+    "language": "",
+    "complexity": "",
     "presentation": "",
     "video": ""
   },
   {
     "id": 103,
     "title": "TBD",
-    "description": "Awesome Talk",
+    "description": "",
     "speakers": [3],
-    "language": "en",
-    "complexity": "Beginner",
+    "language": "",
+    "complexity": "",
     "presentation": "",
     "video": ""
   },
   {
     "id": 104,
     "title": "TBD",
-    "description": "Awesome Talk",
+    "description": "",
     "speakers": [4],
-    "language": "en",
-    "complexity": "Intermediate",
+    "language": "",
+    "complexity": "",
     "presentation": "",
     "video": ""
   },
   {
     "id": 105,
     "title": "TBD",
-    "description": "Awesome Talk",
+    "description": "",
     "speakers": [5],
-    "language": "en",
-    "complexity": "Intermediate",
+    "language": "",
+    "complexity": "",
     "presentation": "",
     "video": ""
   },
   {
     "id": 106,
     "title": "TBD",
-    "description": "Awesome Talk",
+    "description": "",
     "speakers": [6],
-    "language": "en",
-    "complexity": "Beginner",
+    "language": "",
+    "complexity": "",
     "presentation": "",
     "video": ""
   }
