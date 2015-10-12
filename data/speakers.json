@@ -90,10 +90,10 @@
     "id": 5,
     "name": "Hasan Hosgel",
     "title": "Android Developer",
-    "company": "Kitchen Stories",
+    "company": "Kitchen Stories / AJNS New Media GmbH",
     "country": "Germany",
     "photoUrl": "../../images/people/hasan.jpg",
-    "bio": "",
+    "bio": "Hasan Hoşgel is a dedicated Android developer with more then ten years of professional programming. Since 2010 also developing Android applications. Continuous improvement of the architecture and also quality are his interest. He is also co-organizer of the “GDG Berlin Android”. Now working for Kitchen Stories and before that more then seven years for ImmobilienScout24.",
     "tags": ["Android"],
     "badges": [{
         "name": "GDG",
@@ -101,8 +101,17 @@
         "link": "http://www.meetup.com/GDG-Berlin-Android/"
     }],
     "socials": [{
-        "name": "Website",
-        "link": ""
+        "name": "Google+",
+        "link": "https://plus.google.com/+HasanHosgel"
+    }, {
+        "name": "Twitter",
+        "link": "https://twitter.com/alosdev"
+    }, {
+        "name": "GitHub",
+        "link": "https://github.com/alosdev"
+    }, {
+        "name": "SpeakerDeck",
+        "link": "https://speakerdeck.com/alosdev"
     }]
 }, {
     "id": 6,
@@ -119,8 +128,14 @@
         "link": "http://www.meetup.com/Google-Developer-Group-Hamburg/"
     }],
     "socials": [{
-        "name": "Website",
-        "link": "https://www.timroes.de"
+        "name": "GitHub",
+        "link": "https://github.com/andretietz"
+    }, {
+        "name": "Google+",
+        "link": "https://plus.google.com/+AndréTietz/"
+    }, {
+        "name": "Twitter",
+        "link": "https://twitter.com/antietz"
     }]
 }, {
     "id": 6,
@@ -139,5 +154,23 @@
     "socials": [{
         "name": "Google+",
         "link": "https://plus.google.com/+MartinLiersch"
+    }]
+}, {
+    "id": 7,
+    "name": "Moath Qasim",
+    "title": "Software Engineer",
+    "company": "LOVOO",
+    "country": "Germany",
+    "photoUrl": "../../images/people/moath_qasim.jpg",
+    "bio": "I am a software engineer who works with the backend team at LOVOO GmbH, I am always eager to learn new stuff specially in topics related to Computer Science, being an engineer doesn't necessarily means I am only committed to technical topics, I like to dive in some business aspects and entrepreneurship values.",
+    "tags": ["Android"],
+    "badges": [{
+        "name": "GDG",
+        "description": "GDG Dresden",
+        "link": "https://plus.google.com/117123335937961352111/"
+    }],
+    "socials": [{
+        "name": "LinkedIn",
+        "link": "https://www.linkedin.com/pub/mo-ath-qasim/57/a3b/17b"
     }]
 }]

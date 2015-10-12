@@ -59,6 +59,44 @@
     }]
 }, {
     "id": 4,
+    "name": "André Tietz",
+    "title": "Android Developer",
+    "chapter": "GDG Hamburg Android",
+    "company": "myTaxi (Intelligent Apps GmbH)",
+    "country": "",
+    "photoUrl": "../../images/people/andré.jpg",
+    "bio": "",
+    "tags": ["Android"],
+    "badges": [],
+    "socials": [{
+        "name": "GitHub",
+        "link": "https://github.com/andretietz"
+    }, {
+        "name": "Google+",
+        "link": "https://plus.google.com/+AndréTietz/"
+    }, {
+        "name": "Twitter",
+        "link": "https://twitter.com/antietz"
+    }]
+}, {
+    "id": 5,
+    "name": "Inga Breuer",
+    "title": "Software Developer",
+    "chapter": "GDG Member",
+    "company": "Fuse",
+    "photoUrl": "../../images/people/inga.png",
+    "bio": "",
+    "tags": ["Android"],
+    "badges": [],
+    "socials": [{
+        "name": "Google+",
+        "link": "https://plus.google.com/110302548402901939726"
+    }, {
+        "name": "Twitter",
+        "link": "https://twitter.com/ingabreuer22"
+    }]
+}, {
+    "id": 6,
     "name": "Ingo Oeser",
     "title": "Developer",
     "chapter": "GDG Hamburg Golang",
@@ -79,7 +117,7 @@
         "link": "https://twitter.com/nightlyone"
     }]
 }, {
-    "id": 5,
+    "id": 7,
     "name": "Martin Thielecke",
     "title": "Developer",
     "chapter": "GDG Hamburg Golang",
@@ -97,24 +135,7 @@
         "link": "http://www.mthie.com"
     }]
 }, {
-    "id": 7,
-    "name": "Inga Breuer",
-    "title": "Software Developer",
-    "chapter": "GDG Member",
-    "company": "Fuse",
-    "photoUrl": "../../images/people/inga.png",
-    "bio": "",
-    "tags": ["Android"],
-    "badges": [],
-    "socials": [{
-        "name": "Google+",
-        "link": "https://plus.google.com/110302548402901939726"
-    }, {
-        "name": "Twitter",
-        "link": "https://twitter.com/ingabreuer22"
-    }]
-}, {
-    "id": 6,
+    "id": 8,
     "name": "Björn Jensen",
     "title": "",
     "chapter": "GDG Hamburg Android",
