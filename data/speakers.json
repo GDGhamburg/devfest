@@ -70,7 +70,7 @@
     "country": "Germany",
     "photoUrl": "../../images/people/aygul.jpg",
     "bio": "Aygul is absolutely passionate about making our world a better place through technology and science. She is community manager of two Google Developer Groups (GDGs) in Germany and Russia, Google Top Contributor (TC) for Google+ and Gmail, active member of the global Women Techmakers (WTM) community, translator, quantum chemist, classically trained musician as well as MOOC and citizen science enthusiast. When not working or contributing to the community, she enjoys traveling, learning foreign languages, and listening to good music.",
-    "tags": ["Web"],
+    "tags": ["Community"],
     "badges": [{
         "name": "GDG",
         "description": "GDG Stuttgart",
@@ -163,7 +163,7 @@
     "country": "Germany",
     "photoUrl": "../../images/people/moath_qasim.jpg",
     "bio": "I am a software engineer who works with the backend team at LOVOO GmbH, I am always eager to learn new stuff specially in topics related to Computer Science, being an engineer doesn't necessarily means I am only committed to technical topics, I like to dive in some business aspects and entrepreneurship values.",
-    "tags": ["Android"],
+    "tags": ["Cloud"],
     "badges": [{
         "name": "GDG",
         "description": "GDG Dresden",
