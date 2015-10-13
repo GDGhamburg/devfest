@@ -72,7 +72,7 @@
   {
     "id": 108,
     "title": "Dagger 2 - Dependency Injection on Android",
-    "description": "",
+    "description": "A lot of developers are talking about Dependency Injection, how cool it is and how fast/great/spectacular a specific Dependency Injection Framework is, but there are not that many good explainations on how to actually implement it. This talk will handle what Dependency Injection is (very short) and how to implement Dependency Injection with Dagger2 on Android. If you are thinking about using a Dependency Injection framework but you are not really sure how to implement it, this is the talk you should join!",
     "speakers": [6],
     "language": "en",
     "complexity": "",
