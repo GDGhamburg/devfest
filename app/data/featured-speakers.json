@@ -1,21 +1,42 @@
 [{
     "id": 1,
     "name": "Surma",
-    "company": "Google, UK",
+    "company": "Google",
     "photoUrl": "../../images/people/surma.jpg"
 }, {
     "id": 2,
-    "name": "Awesome Speaker",
-    "company": "Company, Great Britain",
-    "photoUrl": "../../images/people/android.jpg"
+    "name": "Tim Roes",
+    "company": "inovex GmbH",
+    "photoUrl": "../../images/people/tim_roes.jpg"
 }, {
     "id": 3,
-    "name": "Awesome Speaker",
-    "company": "Company, Ukraine",
-    "photoUrl": "../../images/people/android.jpg"
+    "name": "Kim Hogeling",
+    "company": "shopping24 internet group",
+    "photoUrl": "../../images/people/kim_hogeling.jpg"
 }, {
     "id": 4,
-    "name": "Awesome Speaker",
-    "company": "Company, Spain",
-    "photoUrl": "../../images/people/android.jpg"
+    "name": "Aygul Zagidullina",
+    "company": "Todoist",
+    "photoUrl": "../../images/people/aygul.jpg"
+}, {
+    "id": 5,
+    "name": "Hasan Hosgel",
+    "company": "Kitchen Stories / AJNS New Media GmbH",
+    "photoUrl": "../../images/people/hasan.jpg"
+}, {
+    "id": 6,
+    "name": "André Tietz",
+    "company": "myTaxi (Intelligent Apps GmbH)",
+    "photoUrl": "../../images/people/andré.jpg"
+}, {
+    "id": 7,
+    "name": "Martin Liersch",
+    "company": "Paradise Android",
+    "photoUrl": "../../images/people/martin_liersch.jpg"
+}, {
+    "id": 8,
+    "name": "Moath Qasim",
+    "company": "LOVOO",
+    "photoUrl": "../../images/people/moath_qasim.jpg"
 }]
+
