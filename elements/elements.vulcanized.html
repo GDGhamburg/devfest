@@ -568,7 +568,7 @@ debouncer.stop();
 }
 }
 });
-Polymer.version = '1.1.3';
+Polymer.version = '1.1.5';
 Polymer.Base._addFeature({
 _registerFeatures: function () {
 this._prepIs();
@@ -2447,7 +2447,15 @@ this.listen(node, name, listeners[key]);
 }
 },
 listen: function (node, eventName, methodName) {
-this._listen(node, eventName, this._createEventHandler(node, eventName, methodName));
+var handler = this._recallEventHandler(this, eventName, node, methodName);
+if (!handler) {
+handler = this._createEventHandler(node, eventName, methodName);
+}
+if (handler._listening) {
+return;
+}
+this._listen(node, eventName, handler);
+handler._listening = true;
 },
 _boundListenerKey: function (eventName, methodName) {
 return eventName + ':' + methodName;
@@ -2486,6 +2494,7 @@ host[methodName](e, e.detail);
 host._warn(host._logf('_createEventHandler', 'listener method `' + methodName + '` not defined'));
 }
 };
+handler._listening = false;
 this._recordEventHandler(host, eventName, node, methodName, handler);
 return handler;
 },
@@ -2493,6 +2502,7 @@ unlisten: function (node, eventName, methodName) {
 var handler = this._recallEventHandler(this, eventName, node, methodName);
 if (handler) {
 this._unlisten(node, eventName, handler);
+handler._listening = false;
 }
 },
 _listen: function (node, eventName, handler) {
@@ -3340,6 +3350,12 @@ elt[n] = props[n];
 }
 }
 return elt;
+},
+isLightDescendant: function (node) {
+return this.contains(node) && Polymer.dom(this).getOwnerRoot() === Polymer.dom(node).getOwnerRoot();
+},
+isLocalDescendant: function (node) {
+return this.root === Polymer.dom(node).getOwnerRoot();
 }
 });
 Polymer.Bind = {
@@ -3907,6 +3923,7 @@ var h$ = this._handlers;
 for (var i = 0, l = h$.length, h; i < l && (h = h$[i]); i++) {
 h[0].call(this, h[1], h[2]);
 }
+this._handlers = [];
 }
 });
 (function () {
@@ -4030,7 +4047,7 @@ this._boundPaths = this._boundPaths || {};
 if (from) {
 this._boundPaths[to] = from;
 } else {
-this.unbindPath(to);
+this.unlinkPaths(to);
 }
 },
 unlinkPaths: function (path) {
@@ -4039,23 +4056,13 @@ delete this._boundPaths[path];
 }
 },
 _notifyBoundPaths: function (path, value) {
-var from, to;
 for (var a in this._boundPaths) {
 var b = this._boundPaths[a];
 if (path.indexOf(a + '.') == 0) {
-from = a;
-to = b;
-break;
+this.notifyPath(this._fixPath(b, a, path), value);
+} else if (path.indexOf(b + '.') == 0) {
+this.notifyPath(this._fixPath(a, b, path), value);
 }
-if (path.indexOf(b + '.') == 0) {
-from = b;
-to = a;
-break;
-}
-}
-if (from && to) {
-var p = this._fixPath(to, from, path);
-this.notifyPath(p, value);
 }
 },
 _fixPath: function (property, root, path) {
@@ -4150,6 +4157,22 @@ if (args.length) {
 this._notifySplice(array, path, 0, args.length, []);
 }
 return ret;
+},
+prepareModelNotifyPath: function (model) {
+this.mixin(model, {
+fire: Polymer.Base.fire,
+notifyPath: Polymer.Base.notifyPath,
+_EVENT_CHANGED: Polymer.Base._EVENT_CHANGED,
+_notifyPath: Polymer.Base._notifyPath,
+_pathEffector: Polymer.Base._pathEffector,
+_annotationPathEffect: Polymer.Base._annotationPathEffect,
+_complexObserverPathEffect: Polymer.Base._complexObserverPathEffect,
+_annotatedComputationPathEffect: Polymer.Base._annotatedComputationPathEffect,
+_computePathEffect: Polymer.Base._computePathEffect,
+_modelForPath: Polymer.Base._modelForPath,
+_pathMatchesEffect: Polymer.Base._pathMatchesEffect,
+_notifyBoundPaths: Polymer.Base._notifyBoundPaths
+});
 }
 });
 }());
@@ -4283,7 +4306,7 @@ MIXIN_RULE: 1000
 OPEN_BRACE: '{',
 CLOSE_BRACE: '}',
 _rx: {
-comments: /\/\*[^*]*\*+([^/*][^*]*\*+)*\//gim,
+comments: /\/\*[^*]*\*+([^\/*][^*]*\*+)*\//gim,
 port: /@import[^;]*;/gim,
 customProp: /(?:^|[\s;])--[^;{]*?:[^{};]*?(?:[;\n]|$)/gim,
 mixinProp: /(?:^|[\s;])--[^;{]*?:[^{;]*?{[^}]*?}(?:[;\n]|$)?/gim,
@@ -5357,6 +5380,7 @@ properties: { __hideTemplateChildren__: { observer: '_showHideChildren' } },
 _instanceProps: Polymer.nob,
 _parentPropPrefix: '_parent_',
 templatize: function (template) {
+this._templatized = template;
 if (!template._content) {
 template._content = template.content;
 }
@@ -5367,11 +5391,11 @@ return;
 }
 var archetype = Object.create(Polymer.Base);
 this._customPrepAnnotations(archetype, template);
+this._prepParentProperties(archetype, template);
 archetype._prepEffects();
 this._customPrepEffects(archetype);
 archetype._prepBehaviors();
 archetype._prepBindings();
-this._prepParentProperties(archetype, template);
 archetype._notifyPath = this._notifyPathImpl;
 archetype._scopeElementClass = this._scopeElementClassImpl;
 archetype.listen = this._listenImpl;
@@ -5454,6 +5478,7 @@ delete parentProps[prop];
 proto = archetype._parentPropProto = Object.create(null);
 if (template != this) {
 Polymer.Bind.prepareModel(proto);
+Polymer.Base.prepareModelNotifyPath(proto);
 }
 for (prop in parentProps) {
 var parentProp = this._parentPropPrefix + prop;
@@ -5472,6 +5497,7 @@ Polymer.Bind.prepareInstance(template);
 template._forwardParentProp = this._forwardParentProp.bind(this);
 }
 this._extendTemplate(template, proto);
+template._pathEffector = this._pathEffectorImpl.bind(this);
 }
 },
 _createForwardPropEffector: function (prop) {
@@ -5482,7 +5508,7 @@ this._forwardParentProp(prop, value);
 _createHostPropEffector: function (prop) {
 var prefix = this._parentPropPrefix;
 return function (source, value) {
-this.dataHost[prefix + prop] = value;
+this.dataHost._templatized[prefix + prop] = value;
 };
 },
 _createInstancePropEffector: function (prop) {
@@ -5514,16 +5540,17 @@ var dot = path.indexOf('.');
 var root = dot < 0 ? path : path.slice(0, dot);
 dataHost._forwardInstancePath.call(dataHost, this, path, value);
 if (root in dataHost._parentProps) {
-dataHost.notifyPath(dataHost._parentPropPrefix + path, value);
+dataHost._templatized.notifyPath(dataHost._parentPropPrefix + path, value);
 }
 },
-_pathEffector: function (path, value, fromAbove) {
+_pathEffectorImpl: function (path, value, fromAbove) {
 if (this._forwardParentPath) {
 if (path.indexOf(this._parentPropPrefix) === 0) {
-this._forwardParentPath(path.substring(8), value);
+var subPath = path.substring(this._parentPropPrefix.length);
+this._forwardParentPath(subPath, value);
 }
 }
-Polymer.Base._pathEffector.apply(this, arguments);
+Polymer.Base._pathEffector.call(this._templatized, path, value, fromAbove);
 },
 _constructorImpl: function (model, host) {
 this._rootDataHost = host._getRootDataHost();
@@ -5566,8 +5593,9 @@ return host._scopeElementClass(node, value);
 stamp: function (model) {
 model = model || {};
 if (this._parentProps) {
+var templatized = this._templatized;
 for (var prop in this._parentProps) {
-model[prop] = this[this._parentPropPrefix + prop];
+model[prop] = templatized[this._parentPropPrefix + prop];
 }
 }
 return new this.ctor(model, this);
@@ -6175,7 +6203,7 @@ this.deselect(item);
 }
 } else {
 this.push('selected', item);
-skey = this._selectedColl.getKey(item);
+var skey = this._selectedColl.getKey(item);
 this.linkPaths('selected.' + skey, 'items.' + key);
 }
 } else {
@@ -7201,7 +7229,7 @@ Example:
      * the selected item or undefined if there is no selection.
      */
     get: function() {
-      return this.multi ? this.selection : this.selection[0];
+      return this.multi ? this.selection.slice() : this.selection[0];
     },
 
     /**
@@ -7288,34 +7316,38 @@ Example:
   Polymer.IronSelectableBehavior = {
 
       /**
-       *  Fired when iron-selector is activated (selected or deselected).
-       *  It is fired before the selected items are changed.
-       *  Cancel the event to abort selection.
+       * Fired when iron-selector is activated (selected or deselected).
+       * It is fired before the selected items are changed.
+       * Cancel the event to abort selection.
        *
        * @event iron-activate
-       *
-       **/
+       */
+
       /**
-       *  Fired when an item is selected
+       * Fired when an item is selected
        *
        * @event iron-select
-       *
-       **/
+       */
+
       /**
-       *  Fired when an item is deselected
+       * Fired when an item is deselected
        *
        * @event iron-deselect
+       */
+
+      /**
+       * Fired when the list of selectable items changes (e.g., items are
+       * added or removed). The detail of the event is a list of mutation
+       * records that describe what changed.
        *
-       **/
+       * @event iron-items-changed
+       */
 
     properties: {
 
       /**
        * If you want to use the attribute value of an element for `selected` instead of the index,
        * set this to the name of the attribute.
-       *
-       * @attribute attrForSelected
-       * @type {string}
        */
       attrForSelected: {
         type: String,
@@ -7324,9 +7356,6 @@ Example:
 
       /**
        * Gets or sets the selected element. The default is to use the index of the item.
-       *
-       * @attribute selected
-       * @type {string}
        */
       selected: {
         type: String,
@@ -7335,9 +7364,6 @@ Example:
 
       /**
        * Returns the currently selected item.
-       *
-       * @attribute selectedItem
-       * @type {Object}
        */
       selectedItem: {
         type: Object,
@@ -7349,10 +7375,6 @@ Example:
        * The event that fires from items when they are selected. Selectable
        * will listen for this event from items and update the selection state.
        * Set to empty string to listen to no events.
-       *
-       * @attribute activateEvent
-       * @type {string}
-       * @default 'tap'
        */
       activateEvent: {
         type: String,
@@ -7363,17 +7385,11 @@ Example:
       /**
        * This is a CSS selector string.  If this is set, only items that match the CSS selector
        * are selectable.
-       *
-       * @attribute selectable
-       * @type {string}
        */
       selectable: String,
 
       /**
        * The class to set on elements when selected.
-       *
-       * @attribute selectedClass
-       * @type {string}
        */
       selectedClass: {
         type: String,
@@ -7382,9 +7398,6 @@ Example:
 
       /**
        * The attribute to set on elements when selected.
-       *
-       * @attribute selectedAttribute
-       * @type {string}
        */
       selectedAttribute: {
         type: String,
@@ -7392,14 +7405,13 @@ Example:
       },
 
       /**
-       * The set of excluded elements where the key is the `localName` 
+       * The set of excluded elements where the key is the `localName`
        * of the element that will be ignored from the item list.
        *
        * @type {object}
        * @default {template: 1}
        */
-
-      excludedLocalNames: {
+      _excludedLocalNames: {
         type: Object,
         value: function() {
           return {
@@ -7416,11 +7428,18 @@ Example:
     created: function() {
       this._bindFilterItem = this._filterItem.bind(this);
       this._selection = new Polymer.IronSelection(this._applySelection.bind(this));
+      // TODO(cdata): When polymer/polymer#2535 lands, we do not need to do this
+      // book keeping anymore:
+      this.__listeningForActivate = false;
     },
 
     attached: function() {
       this._observer = this._observeItems(this);
       this._contentObserver = this._observeContent(this);
+      if (!this.selectedItem && this.selected) {
+        this._updateSelected(this.attrForSelected,this.selected)
+      }
+      this._addListener(this.activateEvent);
     },
 
     detached: function() {
@@ -7487,11 +7506,17 @@ Example:
     },
 
     _addListener: function(eventName) {
+      if (!this.isAttached || this.__listeningForActivate) {
+        return;
+      }
+
+      this.__listeningForActivate = true;
       this.listen(this, eventName, '_activateHandler');
     },
 
     _removeListener: function(eventName) {
       this.unlisten(this, eventName, '_activateHandler');
+      this.__listeningForActivate = false;
     },
 
     _activateEventChanged: function(eventName, old) {
@@ -7508,7 +7533,7 @@ Example:
     },
 
     _filterItem: function(node) {
-      return !this.excludedLocalNames[node.localName];
+      return !this._excludedLocalNames[node.localName];
     },
 
     _valueToItem: function(value) {
@@ -7567,7 +7592,15 @@ Example:
 
     // observe items change under the given node.
     _observeItems: function(node) {
-      var observer = new MutationObserver(function() {
+      // TODO(cdata): Update this when we get distributed children changed.
+      var observer = new MutationObserver(function(mutations) {
+        // Let other interested parties know about the change so that
+        // we don't have to recreate mutation observers everywher.
+        this.fire('iron-items-changed', mutations, {
+          bubbles: false,
+          cancelable: false
+        });
+
         if (this.selected != null) {
           this._updateSelected();
         }
@@ -7695,9 +7728,9 @@ Example:
       var i = this.selectedValues.indexOf(value);
       var unselected = i < 0;
       if (unselected) {
-        this.selectedValues.push(value);
+        this.push('selectedValues',value);
       } else {
-        this.selectedValues.splice(i, 1);
+        this.splice('selectedValues',i,1);
       }
       this._selection.setItemSelected(this._valueToItem(value), unselected);
     }
@@ -15670,7 +15703,7 @@ Dynamically loads the Google Maps JavaScript API, firing the `api-load` event wh
 
 Any number of components can use `<google-maps-api>` elements, and the library will only be loaded once.
 
-@blurb Element wrapper around Google Maps API.
+@summary Element wrapper around Google Maps API.
 
  */
   Polymer({
@@ -15702,15 +15735,6 @@ Any number of components can use `<google-maps-api>` elements, and the library w
        * If set, a Client ID will take precedence over an API Key.
        */
       clientId: {
-        type: String,
-        value: ''
-      },
-
-      /**
-       * The libraries to load with this map. For more information
-       * see https://developers.google.com/maps/documentation/javascript/libraries.
-       */
-      libraries: {
         type: String,
         value: ''
       },
@@ -15758,16 +15782,15 @@ Any number of components can use `<google-maps-api>` elements, and the library w
       /** @private */
       libraryUrl: {
         type: String,
-        computed: '_computeUrl(mapsUrl, version, libraries, apiKey, clientId, language, signedIn)'
+        computed: '_computeUrl(mapsUrl, version, apiKey, clientId, language, signedIn)'
       }
     },
 
-    _computeUrl: function(mapsUrl, version, libraries, apiKey, clientId, language, signedIn) {
+    _computeUrl: function(mapsUrl, version, apiKey, clientId, language, signedIn) {
       var url = mapsUrl + '&v=' + version;
 
-      if (libraries) {
-        url += "&libraries=" + libraries;
-      }
+      // Always load all Maps API libraries.
+      url += '&libraries=drawing,geometry,places,visualization';
 
       if (apiKey && !clientId) {
         url += '&key=' + apiKey;
@@ -15996,33 +16019,988 @@ The standard set of [YouTube player events](https://developers.google.com/youtub
 @demo
 -->
 <script>
-		(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-      (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-      m=s.getElementsByTagName('link')[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-      })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+/**
+Dynamically loads Google JavaScript API `gapi`, firing the `js-api-load` event when ready.
 
-    Polymer({
-      is: 'google-analytics',
-      properties: {
-        code: {
-          type: String,
-          value: 'UA-XXXXX-Y'
-        },
-        displayfeatures: {
-          type: Boolean,
-          value: false
+Any number of components can use `<google-js-api>` elements, and the library will only be loaded once.
+
+##### Example
+
+    <google-js-api></google-js-api>
+    <script>
+      var api = document.querySelector('google-js-api');
+      api.addEventListener('js-api-load', function(e) {
+        console.log('API loaded', gapi);
+      });
+    < /script>
+
+*/
+  Polymer({
+
+    is: 'google-js-api',
+
+    behaviors: [
+      Polymer.IronJsonpLibraryBehavior
+    ],
+
+    properties: {
+
+      /** @private */
+      libraryUrl: {
+        type: String,
+        value: 'https://apis.google.com/js/api.js?onload=%%callback%%'
+      },
+
+      /**
+       * Fired when the API library is loaded and available.
+       * @event js-api-load
+       */
+      /**
+       * Name of event fired when library is loaded and available.
+       */
+      notifyEvent: {
+        type: String,
+        value: 'js-api-load'
+      },
+    },
+
+    get api() {
+      return gapi;
+    }
+
+  });
+</script>
+<script>
+  (function() {
+
+    /**
+     * Enum of attributes to be passed through to the login API call.
+     * @readonly
+     * @enum {string}
+     */
+    var ProxyLoginAttributes = {
+      'appPackageName': 'apppackagename',
+      'clientId': 'clientid',
+      'cookiePolicy': 'cookiepolicy',
+      'requestVisibleActions': 'requestvisibleactions',
+      'hostedDomain': 'hostedDomain'
+    };
+
+    /**
+     * AuthEngine does all interactions with gapi.auth2
+     *
+     * It is tightly coupled with <google-signin-aware> element
+     * The elements configure AuthEngine.
+     * AuthEngine propagates all authentication events to all google-signin-aware elements
+     *
+     * API used: https://developers.google.com/identity/sign-in/web/reference
+     *
+     */
+    var AuthEngine = {
+
+      /**
+       * oauth2 argument, set by google-signin-aware
+       */
+      _clientId: null,
+
+      get clientId() {
+        return this._clientId;
+      },
+
+      set clientId(val) {
+        if (this._clientId && val && val != this._clientId) {
+          throw new Error('clientId cannot change. Values do not match. New: ' + val + ' Old:' + this._clientId);
+        }
+        if (val) {
+          this._clientId = val;
+          this.initAuth2();
         }
       },
-      ready: function() {
-        ga('create', this.code, 'auto');
 
-        if (this.displayfeatures)
-          ga('require', 'displayfeatures');
+      /**
+       * oauth2 argument, set by google-signin-aware
+       */
+      _cookiePolicy: 'single_host_origin',
 
-        ga('send', 'pageview');
+      get cookiePolicy() {
+        return this._cookiePolicy;
+      },
+
+      set cookiePolicy(val) {
+        if (val) {
+          this._cookiePolicy = val;
+        }
+      },
+
+      /**
+       * oauth2 argument, set by google-signin-aware
+       */
+      _appPackageName: '',
+
+      get appPackageName() {
+        return this._appPackageName;
+      },
+
+      set appPackageName(val) {
+        if (this._appPackageName && val && val != this._appPackageName) {
+          throw new Error('appPackageName cannot change. Values do not match. New: ' + val + ' Old: ' + this._appPackageName);
+        }
+        if (val) {
+          this._appPackageName = val;
+        }
+      },
+
+     /**
+       * oauth2 argument, set by google-signin-aware
+       */
+      _requestVisibleActions: '',
+
+      get requestVisibleactions() {
+        return this._requestVisibleActions;
+      },
+
+      set requestVisibleactions(val) {
+        if (this._requestVisibleActions && val && val != this._requestVisibleActions) {
+          throw new Error('requestVisibleactions cannot change. Values do not match. New: ' + val + ' Old: ' + this._requestVisibleActions);
+        }
+        if (val)
+          this._requestVisibleActions = val;
+      },
+
+     /**
+       * oauth2 argument, set by google-signin-aware
+       */
+      _hostedDomain: '',
+
+      get hostedDomain() {
+        return this._hostedDomain;
+      },
+
+      set hostedDomain(val) {
+        if (this._hostedDomain && val && val != this._hostedDomain) {
+          throw new Error('hostedDomain cannot change. Values do not match. New: ' + val + ' Old: ' + this._hostedDomain);
+        }
+        if (val)
+          this._hostedDomain = val;
+      },
+
+      /** Is offline access currently enabled in the google-signin-aware element? */
+      _offline: false,
+
+      get offline() {
+        return this._offline;
+      },
+
+      set offline(val) {
+        this._offline = val;
+        this.updateAdditionalAuth();
+      },
+
+      /** Should we force a re-prompt for offline access? */
+      _offlineAlwaysPrompt: false,
+
+      get offlineAlwaysPrompt() {
+        return this._offlineAlwaysPrompt;
+      },
+
+      set offlineAlwaysPrompt(val) {
+        this._offlineAlwaysPrompt = val;
+        this.updateAdditionalAuth();
+      },
+
+      /** Have we already gotten offline access from Google during this session? */
+      offlineGranted: false,
+
+      /** <google-js-api> */
+      _apiLoader: null,
+
+      /** an array of wanted scopes. oauth2 argument */
+      _requestedScopeArray: [],
+
+      /** _requestedScopeArray as string */
+      get requestedScopes() {
+        return this._requestedScopeArray.join(' ');
+      },
+
+      /** Is user signed in? */
+      _signedIn: false,
+
+      /** Currently granted scopes */
+      _grantedScopeArray: [],
+
+      /** True if additional authorization is required */
+      _needAdditionalAuth: true,
+
+      /** True if have google+ scopes */
+      _hasPlusScopes: false,
+
+      /**
+       * array of <google-signin-aware>
+       * state changes are broadcast to them
+       */
+      signinAwares: [],
+
+      init: function() {
+        this._apiLoader = document.createElement('google-js-api');
+        this._apiLoader.addEventListener('js-api-load', this.loadAuth2.bind(this));
+      },
+
+      loadAuth2: function() {
+        gapi.load('auth2', this.initAuth2.bind(this));
+      },
+
+      initAuth2: function() {
+        if (!('gapi' in window) || !('auth2' in window.gapi) || !this.clientId) {
+          return;
+        }
+        var auth = gapi.auth2.init({
+          'client_id': this.clientId,
+          'cookie_policy': this.cookiePolicy,
+          'scope': this.requestedScopes,
+          'hosted_domain': this.hostedDomain
+        });
+
+        auth.currentUser.listen(this.handleUserUpdate.bind(this));
+
+        auth.then(
+          function success() {
+          // Let the current user listener trigger the changes.
+          },
+          function error(error) {
+            console.error(error);
+          }
+        );
+      },
+
+      handleUserUpdate: function(newPrimaryUser) {
+        // update and broadcast currentUser
+        var isSignedIn = newPrimaryUser.isSignedIn();
+        if (isSignedIn != this._signedIn) {
+          this._signedIn = isSignedIn;
+          for (var i=0; i<this.signinAwares.length; i++) {
+            this.signinAwares[i]._setSignedIn(isSignedIn);
+          }
+        }
+
+        // update granted scopes
+        this._grantedScopeArray = this.strToScopeArray(
+          newPrimaryUser.getGrantedScopes());
+        // console.log(this._grantedScopeArray);
+        this.updateAdditionalAuth();
+
+        var response = newPrimaryUser.getAuthResponse();
+        for (var i=0; i<this.signinAwares.length; i++) {
+          this.signinAwares[i]._updateScopeStatus(response);
+        }
+      },
+
+      setOfflineCode: function(code) {
+        for (var i=0; i<this.signinAwares.length; i++) {
+          this.signinAwares[i]._updateOfflineCode(code);
+        }
+      },
+
+      /** convert scope string to scope array */
+      strToScopeArray: function(str) {
+        if (!str) {
+          return [];
+        }
+        // remove extra spaces, then split
+        var scopes = str.replace(/\ +/g, ' ').trim().split(' ');
+        for (var i=0; i<scopes.length; i++) {
+          scopes[i] = scopes[i].toLowerCase();
+           // Handle scopes that will be deprecated but are still returned with their old value
+          if (scopes[i] === 'https://www.googleapis.com/auth/userinfo.profile') {
+            scopes[i] = 'profile';
+          }
+          if (scopes[i] === 'https://www.googleapis.com/auth/userinfo.email') {
+            scopes[i] = 'email';
+          }
+        }
+        // return with duplicates filtered out
+        return scopes.filter( function(value, index, self) {
+          return self.indexOf(value) === index;
+        });
+      },
+
+      /** true if scopes have google+ scopes */
+      isPlusScope: function(scope) {
+        return (scope.indexOf('/auth/games') > -1)
+            || (scope.indexOf('auth/plus.') > -1 && scope.indexOf('auth/plus.me') < 0);
+      },
+
+      /** true if scopes have been granted */
+      hasGrantedScopes: function(scopeStr) {
+        var scopes = this.strToScopeArray(scopeStr);
+        for (var i=0; i< scopes.length; i++) {
+          if (this._grantedScopeArray.indexOf(scopes[i]) === -1)
+            return false;
+        }
+        return true;
+      },
+
+      /** request additional scopes */
+      requestScopes: function(newScopeStr) {
+        var newScopes = this.strToScopeArray(newScopeStr);
+        var scopesUpdated = false;
+        for (var i=0; i<newScopes.length; i++) {
+          if (this._requestedScopeArray.indexOf(newScopes[i]) === -1) {
+            this._requestedScopeArray.push(newScopes[i]);
+            scopesUpdated = true;
+          }
+        }
+        if (scopesUpdated) {
+          this.updateAdditionalAuth();
+          this.updatePlusScopes();
+        }
+      },
+
+      /** update status of _needAdditionalAuth */
+      updateAdditionalAuth: function() {
+        var needMoreAuth = false;
+        if ((this.offlineAlwaysPrompt || this.offline ) && !this.offlineGranted) {
+          needMoreAuth = true;
+        } else {
+          for (var i=0; i<this._requestedScopeArray.length; i++) {
+            if (this._grantedScopeArray.indexOf(this._requestedScopeArray[i]) === -1) {
+              needMoreAuth = true;
+              break;
+            }
+          }
+        }
+        if (this._needAdditionalAuth != needMoreAuth) {
+          this._needAdditionalAuth = needMoreAuth;
+          // broadcast new value
+          for (var i=0; i<this.signinAwares.length; i++) {
+            this.signinAwares[i]._setNeedAdditionalAuth(needMoreAuth);
+          }
+        }
+      },
+
+      updatePlusScopes: function() {
+        var hasPlusScopes = false;
+        for (var i = 0; i < this._requestedScopeArray.length; i++) {
+          if (this.isPlusScope(this._requestedScopeArray[i])) {
+            hasPlusScopes = true;
+            break;
+          }
+        }
+        if (this._hasPlusScopes != hasPlusScopes) {
+          this._hasPlusScopes = hasPlusScopes;
+          for (var i=0; i<this.signinAwares.length; i++) {
+            this.signinAwares[i]._setHasPlusScopes(hasPlusScopes);
+          }
+        }
+      },
+      /**
+       * attached <google-signin-aware>
+       * @param {<google-signin-aware>} aware element to add
+       */
+      attachSigninAware: function(aware) {
+        if (this.signinAwares.indexOf(aware) == -1) {
+          this.signinAwares.push(aware);
+          // Initialize aware properties
+          aware._setNeedAdditionalAuth(this._needAdditionalAuth);
+          aware._setSignedIn(this._signedIn);
+          aware._setHasPlusScopes(this._hasPlusScopes);
+        } else {
+          console.warn('signinAware attached more than once', aware);
+        }
+      },
+
+      detachSigninAware: function(aware) {
+        var index = this.signinAwares.indexOf(aware);
+        if (index != -1) {
+          this.signinAwares.splice(index, 1);
+        } else {
+          console.warn('Trying to detach unattached signin-aware');
+        }
+      },
+
+      /** returns scopes not granted */
+      getMissingScopes: function() {
+        return this._requestedScopeArray.filter( function(scope) {
+          return this._grantedScopeArray.indexOf(scope) === -1;
+        }.bind(this)).join(' ');
+      },
+
+      assertAuthInitialized: function() {
+        if (!this.clientId) {
+          throw new Error("AuthEngine not initialized. clientId has not been configured.");
+        }
+        if (!('gapi' in window)) {
+          throw new Error("AuthEngine not initialized. gapi has not loaded.");
+        }
+        if (!('auth2' in window.gapi)) {
+          throw new Error("AuthEngine not initialized. auth2 not loaded.");
+        }
+      },
+
+      /** pops up sign-in dialog */
+      signIn: function() {
+        this.assertAuthInitialized();
+        var params = {
+          'scope': this.getMissingScopes()
+        };
+
+        // Proxy specific attributes through to the signIn options.
+        Object.keys(ProxyLoginAttributes).forEach(function(key) {
+          if (this[key] && this[key] !== '') {
+            params[ProxyLoginAttributes[key]] = this[key];
+          }
+        }, this);
+
+        var promise;
+        var user = gapi.auth2.getAuthInstance().currentUser.get();
+        if (!(this.offline || this.offlineAlwaysPrompt)) {
+          if (user.getGrantedScopes()) {
+            // additional auth, skip multiple account dialog
+            promise = user.grant(params);
+          } else {
+            // initial signin
+            promise = gapi.auth2.getAuthInstance().signIn(params);
+          }
+        } else {
+          params.redirect_uri = 'postmessage';
+          if (this.offlineAlwaysPrompt) {
+            params.approval_prompt = 'force';
+          }
+
+          // Despite being documented at https://goo.gl/tiO0Bk
+          // It doesn't seem like user.grantOfflineAccess() actually exists in
+          // the current version of the Google Sign-In JS client we're using
+          // through GoogleWebComponents. So in the offline case, we will not
+          // distinguish between a first auth and an additional one.
+          promise = gapi.auth2.getAuthInstance().grantOfflineAccess(params);
+        }
+        promise.then(
+          function success(response) {
+            // If login was offline, response contains one string "code"
+            // Otherwise it contains the user object already
+            var newUser;
+            if (response.code) {
+              AuthEngine.offlineGranted = true;
+              newUser = gapi.auth2.getAuthInstance().currentUser.get();
+              AuthEngine.setOfflineCode(response.code);
+            } else {
+              newUser = response;
+            }
+
+            var authResponse = newUser.getAuthResponse();
+            // Let the current user listener trigger the changes.
+          },
+          function error(error) {
+            if ("Access denied." == error.reason) {
+              // Access denied is not an error, user hit cancel
+              return;
+            } else {
+              console.error(error);
+            }
+          }
+        );
+      },
+
+      /** signs user out */
+      signOut: function() {
+        this.assertAuthInitialized();
+        gapi.auth2.getAuthInstance().signOut().then(
+          function success() {
+          // Let the current user listener trigger the changes.
+          },
+          function error(error) {
+            console.error(error);
+          }
+        );
+      }
+    };
+
+    AuthEngine.init();
+
+/**
+`google-signin-aware` is used to enable authentication in custom elements by
+interacting with a google-signin element that needs to be present somewhere
+on the page.
+
+The `scopes` attribute allows you to specify which scope permissions are required
+(e.g do you want to allow interaction with the Google Drive API).
+
+The `google-signin-aware-success` event is triggered when a user successfully
+authenticates. If either `offline` or `offlineAlwaysPrompt` is set to true, successful
+authentication will also trigger the `google-signin-offline-success`event.
+The `google-signin-aware-signed-out` event is triggered when a user explicitly
+signs out via the google-signin element.
+
+You can bind to `isAuthorized` property to monitor authorization state.
+##### Example
+
+    <google-signin-aware scopes="https://www.googleapis.com/auth/drive"></google-signin-aware>
+
+
+##### Example with offline
+    <template id="awareness" is="dom-bind">
+      <google-signin-aware
+          scopes="https://www.googleapis.com/auth/drive"
+          offline
+          on-google-signin-aware-success="handleSignin"
+          on-google-signin-offline-success="handleOffline"></google-signin-aware>
+    <\/template>
+    <script>
+      var aware = document.querySelector('#awareness');
+      aware.handleSignin = function(response) {
+        var user = gapi.auth2.getAuthInstance().currentUser.get();
+        console.log('User name: ' + user.getBasicProfile().getName());
+      };
+      aware.handleOffline = function(response) {
+        console.log('Offline code received: ' + response.detail.code);
+        // Here you would POST response.detail.code to your webserver, which can
+        // exchange the authorization code for an access token. More info at:
+        // https://developers.google.com/identity/protocols/OAuth2WebServer
+      };
+    <\/script>
+*/
+    Polymer({
+
+      is: 'google-signin-aware',
+
+      /**
+       * Fired when this scope has been authorized
+       * @param {Object} result Authorization result.
+       * @event google-signin-aware-success
+       */
+      /**
+       * Fired when an offline authorization is successful.
+       * @param {Object} detail
+       * @param {string} detail.code The one-time authorization code from Google.
+       *     Your application can exchange this for an `access_token` and `refresh_token`
+       * @event google-signin-offline-success
+       */
+      /**
+       * Fired when this scope is not authorized
+       * @event google-signin-aware-signed-out
+       */
+      properties: {
+        /**
+         * App package name for android over-the-air installs.
+         * See the relevant [docs](https://developers.google.com/+/web/signin/android-app-installs)
+         */
+        appPackageName: {
+          type: String,
+          observer: '_appPackageNameChanged'
+        },
+        /**
+         * a Google Developers clientId reference
+         */
+        clientId: {
+          type: String,
+          observer: '_clientIdChanged'
+        },
+
+        /**
+         * The cookie policy defines what URIs have access to the session cookie
+         * remembering the user's sign-in state.
+         * See the relevant [docs](https://developers.google.com/+/web/signin/reference#determining_a_value_for_cookie_policy) for more information.
+         * @default 'single_host_origin'
+         */
+        cookiePolicy: {
+          type: String,
+          observer: '_cookiePolicyChanged'
+        },
+
+        /**
+         * The app activity types you want to write on behalf of the user
+         * (e.g http://schemas.google.com/AddActivity)
+         *
+         */
+        requestVisibleActions: {
+          type: String,
+          observer: '_requestVisibleActionsChanged'
+        },
+
+        /**
+         * The Google Apps domain to which users must belong to sign in.
+         * See the relevant [docs](https://developers.google.com/identity/sign-in/web/reference) for more information.
+         */
+        hostedDomain: {
+          type: String,
+          observer: '_hostedDomainChanged'
+        },
+
+       /**
+         * Allows for offline `access_token` retrieval during the signin process.
+         * See also `offlineAlwaysPrompt`. You only need to set one of the two; if both
+         * are set, the behavior of `offlineAlwaysPrompt` will override `offline`.
+         */
+        offline: {
+          type: Boolean,
+          value: false,
+          observer: '_offlineChanged'
+        },
+
+        /**
+          * Works the same as `offline` with the addition that it will always
+          * force a re-prompt to the user, guaranteeing that you will get a
+          * refresh_token even if the user has already granted offline access to
+          * this application. You only need to set one of `offline` or
+          * `offlineAlwaysPrompt`, not both.
+          */
+        offlineAlwaysPrompt: {
+          type: Boolean,
+          value: false,
+          observer: '_offlineAlwaysPromptChanged'
+        },
+
+       /**
+         * The scopes to provide access to (e.g https://www.googleapis.com/auth/drive)
+         * and should be space-delimited.
+         */
+        scopes: {
+          type: String,
+          value: 'profile',
+          observer: '_scopesChanged'
+        },
+
+        /**
+         * True if user is signed in
+         */
+        signedIn: {
+          type: Boolean,
+          notify: true,
+          readOnly: true
+        },
+
+        /**
+         * True if authorizations for *this* element have been granted
+         */
+        isAuthorized: {
+          type: Boolean,
+          notify: true,
+          readOnly: true,
+          value: false
+        },
+
+        /**
+         * True if additional authorizations for *any* element are required
+         */
+        needAdditionalAuth: {
+          type: Boolean,
+          notify: true,
+          readOnly: true
+        },
+
+        /**
+         * True if *any* element has google+ scopes
+         */
+        hasPlusScopes: {
+          type: Boolean,
+          value: false,
+          notify: true,
+          readOnly: true
+        }
+      },
+
+      attached: function() {
+        AuthEngine.attachSigninAware(this);
+      },
+
+      detached: function() {
+        AuthEngine.detachSigninAware(this);
+      },
+
+      /** pops up the authorization dialog */
+      signIn: function() {
+        AuthEngine.signIn();
+      },
+
+      /** signs user out */
+      signOut: function() {
+        AuthEngine.signOut();
+      },
+
+      _appPackageNameChanged: function(newName, oldName) {
+        AuthEngine.appPackageName = newName;
+      },
+
+      _clientIdChanged: function(newId, oldId) {
+        AuthEngine.clientId = newId;
+      },
+
+      _cookiePolicyChanged: function(newPolicy, oldPolicy) {
+        AuthEngine.cookiePolicy = newPolicy;
+      },
+
+      _requestVisibleActionsChanged: function(newVal, oldVal) {
+        AuthEngine.requestVisibleActions = newVal;
+      },
+
+      _hostedDomainChanged: function(newVal, oldVal) {
+        AuthEngine.hostedDomain = newVal;
+      },
+
+      _offlineChanged: function(newVal, oldVal) {
+        AuthEngine.offline = newVal;
+      },
+
+      _offlineAlwaysPromptChanged: function(newVal, oldVal) {
+        AuthEngine.offlineAlwaysPrompt = newVal;
+      },
+
+      _scopesChanged: function(newVal, oldVal) {
+        AuthEngine.requestScopes(newVal);
+        this._updateScopeStatus();
+      },
+
+      _updateScopeStatus: function(user) {
+        var newAuthorized = this.signedIn && AuthEngine.hasGrantedScopes(this.scopes);
+        if (newAuthorized !== this.isAuthorized) {
+          this._setIsAuthorized(newAuthorized);
+          if (newAuthorized) {
+            this.fire('google-signin-aware-success', user);
+          }
+          else {
+            this.fire('google-signin-aware-signed-out', user);
+          }
+        }
+      },
+
+      _updateOfflineCode: function(code) {
+        if (code) {
+          this.fire('google-signin-offline-success', {code: code});
+        }
       }
     });
-  </script>
+  })();
+</script>
+<!--
+Element for loading a specific client Google API with the JavaScript client library.
+
+For loading `gapi.client` libraries
+
+##### Example
+
+    <google-client-loader id="shortener"
+      name="urlshortener"
+      version="v1"></google-client-loader>
+
+    <script>
+      var shortener = document.getElementById('shortener');
+      shortener.addEventListener('google-api-load', function(event) {
+        var request = shortener.api.url.get({
+           shortUrl: 'http://goo.gl/fbsS'
+        });
+        request.execute(function(resp) {
+          console.log(resp);
+        });
+      });
+    </script>
+
+@demo
+-->
+<!--
+google-analytics-loader is used internally by elements that need to know api state, and user state.
+
+Loads gapi.client.analytics, and watches user signed-in state.
+
+@element google-analytics-loader
+@demo
+@homepage https://googlewebcomponents.github.io/google-analytics
+-->
+
+<!--
+Element for querying the Google Analytics Core Reporting API.
+
+##### Example
+
+    <google-analytics-query
+      ids="ga:1174"
+      metrics="ga:sessions"
+      dimensions="ga:country"
+      sort="-ga:sessions"
+      max-results="5">
+    </google-analytics-query>
+
+@element google-analytics-query
+@demo
+@homepage https://googlewebcomponents.github.io/google-analytics
+-->
+
+<script>
+/**
+Dynamically loads the legacy Google JavaScript API Loader (https://developers.google.com/loader/).
+
+Fires `api-load` event when ready.
+*/
+  Polymer({
+
+    is: 'google-legacy-loader',
+
+    behaviors: [
+      Polymer.IronJsonpLibraryBehavior
+    ],
+
+    properties: {
+
+      /** @private */
+      libraryUrl: {
+        type: String,
+        value: 'https://www.google.com/jsapi?callback=%%callback%%'
+      },
+
+      /**
+       * Fired when the API library is loaded and available.
+       * @event js-api-load
+       */
+      /**
+       * Name of event fired when library is loaded and available.
+       */
+      notifyEvent: {
+        type: String,
+        value: 'api-load'
+      }
+    },
+
+    /**
+     * Wrapper for `google` API namespace.
+     */
+    get api() {
+      return google;
+    }
+  });
+</script>
+<!--
+`google-chart` encapsulates Google Charts as a web component, allowing you to easily visualize
+data. From simple line charts to complex hierarchical tree maps, the chart element provides a
+number of ready-to-use chart types.
+
+    <google-chart
+      type='pie'
+      options='{"title": "Distribution of days in 2001Q1"}'
+      cols='[{"label":"Month", "type":"string"}, {"label":"Days", "type":"number"}]'
+      rows='[["Jan", 31],["Feb", 28],["Mar", 31]]'>
+    </google-chart>
+
+Height and width are specified as style attributes:
+
+    google-chart {
+      height: 300px;
+      width: 50em;
+    }
+
+Data can be provided in one of three ways:
+
+- Via the `cols` and `rows` attributes:
+
+      cols='[{"label":"Mth", "type":"string"}, {"label":"Days", "type":"number"}]'
+      rows='[["Jan", 31],["Feb", 28],["Mar", 31]]'
+
+- Via the `data` attribute, passing in the data directly:
+
+      data='[["Month", "Days"], ["Jan", 31], ["Feb", 28], ["Mar", 31]]'
+
+- Via the `data` attribute, passing in the URL to a resource containing the
+  data, in JSON format:
+
+      data='http://example.com/chart-data.json'
+@demo
+-->
+<!--
+Element for displaying the results of a Google Analytics query in a
+Google Chart.
+
+##### Example
+
+    <google-analytics-chart
+      type="column"
+      ids="ga:1174"
+      metrics="ga:sessions"
+      dimensions="ga:country"
+      sort="-ga:sessions"
+      max-results="5">
+    </google-analytics-chart>
+
+@element google-analytics-chart
+@demo
+@homepage https://googlewebcomponents.github.io/google-analytics
+-->
+
+<script>!function(e){if("object"==typeof exports&&"undefined"!=typeof module)module.exports=e();else if("function"==typeof define&&define.amd)define([],e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),f.gaApiUtils=e()}}(function(){var define,module,exports;return function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s}({1:[function(require,module,exports){function AccountSummaries(accounts){this.accounts_=accounts;this.webProperties_=[];this.profiles_=[];this.accountsById_={};this.webPropertiesById_=this.propertiesById_={};this.profilesById_=this.viewsById_={};for(var i=0,account;account=this.accounts_[i];i++){this.accountsById_[account.id]={self:account};if(!account.webProperties)continue;alias(account,"webProperties","properties");for(var j=0,webProperty;webProperty=account.webProperties[j];j++){this.webProperties_.push(webProperty);this.webPropertiesById_[webProperty.id]={self:webProperty,parent:account};if(!webProperty.profiles)continue;alias(webProperty,"profiles","views");for(var k=0,profile;profile=webProperty.profiles[k];k++){this.profiles_.push(profile);this.profilesById_[profile.id]={self:profile,parent:webProperty,grandParent:account}}}}}AccountSummaries.prototype.all=function(){return this.accounts_};alias(AccountSummaries.prototype,"all","allAccounts");AccountSummaries.prototype.allWebProperties=function(){return this.webProperties_};alias(AccountSummaries.prototype,"allWebProperties","allProperties");AccountSummaries.prototype.allProfiles=function(){return this.profiles_};alias(AccountSummaries.prototype,"allProfiles","allViews");AccountSummaries.prototype.get=function(obj){if(!!obj.accountId+!!obj.webPropertyId+!!obj.propertyId+!!obj.profileId+!!obj.viewId>1){throw new Error("get() only accepts an object with a single "+'property: either "accountId", "webPropertyId", "propertyId", '+'"profileId" or "viewId"')}return this.getProfile(obj.profileId||obj.viewId)||this.getWebProperty(obj.webPropertyId||obj.propertyId)||this.getAccount(obj.accountId)};AccountSummaries.prototype.getAccount=function(accountId){return this.accountsById_[accountId]&&this.accountsById_[accountId].self};AccountSummaries.prototype.getWebProperty=function(webPropertyId){return this.webPropertiesById_[webPropertyId]&&this.webPropertiesById_[webPropertyId].self};alias(AccountSummaries.prototype,"getWebProperty","getProperty");AccountSummaries.prototype.getProfile=function(profileId){return this.profilesById_[profileId]&&this.profilesById_[profileId].self};alias(AccountSummaries.prototype,"getProfile","getView");AccountSummaries.prototype.getAccountByProfileId=function(profileId){return this.profilesById_[profileId]&&this.profilesById_[profileId].grandParent};alias(AccountSummaries.prototype,"getAccountByProfileId","getAccountByViewId");AccountSummaries.prototype.getWebPropertyByProfileId=function(profileId){return this.profilesById_[profileId]&&this.profilesById_[profileId].parent};alias(AccountSummaries.prototype,"getWebPropertyByProfileId","getPropertyByViewId");AccountSummaries.prototype.getAccountByWebPropertyId=function(webPropertyId){return this.webPropertiesById_[webPropertyId]&&this.webPropertiesById_[webPropertyId].parent};alias(AccountSummaries.prototype,"getAccountByWebPropertyId","getAccountByPropertyId");function alias(object,referenceProp,aliasName){if(Object.defineProperty){Object.defineProperty(object,aliasName,{get:function(){return object[referenceProp]}})}else{object[aliasName]=object[referenceProp]}}module.exports=AccountSummaries},{}],2:[function(require,module,exports){var AccountSummaries=require("./account-summaries");var cache;function requestAccountSummaries(){var promise=gapi.client.analytics.management.accountSummaries.list().then(function(resp){return resp});return new promise.constructor(function(resolve,reject){var summaries=[];promise.then(function fn(resp){var result=resp.result;if(result.items){summaries=summaries.concat(result.items)}else{reject(new Error("You do not have any Google Analytics accounts. "+"Go to http://google.com/analytics to sign up."))}if(result.startIndex+result.itemsPerPage<=result.totalResults){gapi.client.analytics.management.accountSummaries.list({"start-index":result.startIndex+result.itemsPerPage}).then(fn)}else{resolve(new AccountSummaries(summaries))}}).then(null,reject)})}module.exports={get:function(noCache){if(noCache)cache=null;return cache||(cache=requestAccountSummaries())}}},{"./account-summaries":1}],3:[function(require,module,exports){var Metadata=require("./metadata");var cache;function requestMetadata(){var promise=gapi.client.analytics.metadata.columns.list({reportType:"ga"}).then(function(resp){return resp});return new promise.constructor(function(resolve,reject){promise.then(function(resp){resolve(new Metadata(resp.result.items))}).then(null,reject)})}module.exports={get:function(noCache){if(noCache)cache=null;return cache||(cache=requestMetadata())}}},{"./metadata":4}],4:[function(require,module,exports){function Metadata(columns){this._columns=columns;this._metrics=[];this._dimensions=[];this._ids={};this._columns.forEach(function(column){this._ids[column.id]=column.attributes;if(column.attributes.type=="METRIC"){this._metrics.push(column)}else if(column.attributes.type=="DIMENSION"){this._dimensions.push(column)}}.bind(this))}Metadata.prototype.all=function(status){return!status?this._columns:this._columns.filter(function(column){return column.attributes.status.toLowerCase()===status.toLowerCase()})};Metadata.prototype.allMetrics=function(status){return!status?this._metrics:this._metrics.filter(function(metric){return metric.attributes.status.toLowerCase()===status.toLowerCase()})};Metadata.prototype.allDimensions=function(status){return!status?this._dimensions:this._dimensions.filter(function(dimension){return dimension.attributes.status.toLowerCase()===status.toLowerCase()})};Metadata.prototype.get=function(id){return this._ids[id]};module.exports=Metadata},{}],5:[function(require,module,exports){module.exports={accountSummaries:require("./account-summaries"),metadata:require("./metadata")}},{"./account-summaries":2,"./metadata":3}]},{},[5])(5)});</script>
+<!--
+Element for selecting the view ID (ids) value for queries inside a
+`<google-analytics-dashboard>` element.
+
+##### Example
+
+    <google-analytics-dashboard>
+
+      <google-analytics-view-selector></google-analytics-view-selector>
+
+      <google-analytics-chart
+        metrics="ga:sessions"
+        dimensions="ga:date">
+      </google-analytics-chart>
+
+    </google-analytics-dashboard>
+
+@element google-analytics-view-selector
+@demo
+@homepage https://googlewebcomponents.github.io/google-analytics
+-->
+
+<!--
+Element for selecting the start and end date values for queries inside a
+`<google-analytics-dashboard>` element.
+
+##### Example
+
+    <google-analytics-dashboard>
+
+      <google-analytics-date-selector
+        start-date="30daysAgo"
+        end-date="today">
+      </google-analytics-date-selector>
+
+      <google-analytics-chart
+        ids="ga:1174"
+        metrics="ga:sessions"
+        dimensions="ga:date">
+      </google-analytics-chart>
+
+    </google-analytics-dashboard>
+
+@element google-analytics-date-selector
+@demo
+@homepage https://googlewebcomponents.github.io/google-analytics
+-->
+
+<!--
+Container element for binding Google Analytics controls to Google Analytics charts.
+
+`<google-analytics-chart>` elements inside a `<google-analytics-dashboard>`
+element will automatically update as control elements (e.g.
+`<google-analytics-view-selector>` or `<google-analytics-date-selector>`)
+update query parameters.
+
+##### Example
+
+    <google-analytics-dashboard>
+
+      <google-analytics-view-selector></google-analytics-view-selector>
+      <google-analytics-date-selector></google-analytics-date-selector>
+
+      <google-analytics-chart
+        metrics="ga:sessions"
+        dimensions="ga:country"
+        sort="-ga:sessions"
+        max-results="5"
+        chart-type="column">
+      </google-analytics-chart>
+
+    </google-analytics-dashboard>
+
+@element google-analytics-dashboard
+@demo
+@homepage https://googlewebcomponents.github.io/google-analytics
+-->
+
 <!-- Molecules elements -->
 <script>/**
  * marked - a markdown parser
@@ -17311,15 +18289,24 @@ if (typeof module !== 'undefined' && typeof exports === 'object') {
 }());
 </script>
 <!--
-Element wrapper for the [marked](http://marked.org/) library.
+Element wrapper for the [marked](https://github.com/chjj/marked) library.
 
-`<marked-element>` accepts Markdown source either via its `markdown` attribute:
+`<marked-element>` accepts Markdown source, and renders it to a child
+element with the class `markdown-html`. This child element can be styled
+as you would a normal DOM element. If you do not provide a child element
+with the `markdown-html` class, the Markdown source will still be rendered,
+but to a shadow DOM child that cannot be styled.
 
-    <marked-element markdown="`Markdown` is _awesome_!"></marked-element>
+The Markdown source can be specified either via the `markdown` attribute:
+
+    <marked-element markdown="`Markdown` is _awesome_!">
+      <div class="markdown-html"></div>
+    </marked-element>
 
 Or, you can provide it via a `<script type="text/markdown">` element child:
 
     <marked-element>
+      <div class="markdown-html"></div>
       <script type="text/markdown">
         Check out my markdown!
 
@@ -17336,6 +18323,19 @@ Or, you can provide it via a `<script type="text/markdown">` element child:
 
 Note that the `<script type="text/markdown">` approach is _static_. Changes to
 the script content will _not_ update the rendered markdown!
+
+### Styling
+If you are using a child with the `markdown-html` class, you can style it
+as you would a regular DOM element:
+
+    .markdown-html p {
+      color: red;
+    }
+
+    .markdown-html td:first-child {
+      padding-left: 24px;
+    }
+
 @element marked-element
 @group Molecules
 @hero hero.svg
@@ -19690,12 +20690,16 @@ process.chdir = function (dir) {
 };
 
 },{}],3:[function(require,module,exports){
-var isArray = require('isarray');
+var isarray = require('isarray')
 
 /**
  * Expose `pathToRegexp`.
  */
-module.exports = pathToRegexp;
+module.exports = pathToRegexp
+module.exports.parse = parse
+module.exports.compile = compile
+module.exports.tokensToFunction = tokensToFunction
+module.exports.tokensToRegExp = tokensToRegExp
 
 /**
  * The main path matching regexp utility.
@@ -19709,12 +20713,175 @@ var PATH_REGEXP = new RegExp([
   // Match Express-style parameters and un-named parameters with a prefix
   // and optional suffixes. Matches appear as:
   //
-  // "/:test(\\d+)?" => ["/", "test", "\d+", undefined, "?"]
-  // "/route(\\d+)" => [undefined, undefined, undefined, "\d+", undefined]
-  '([\\/.])?(?:\\:(\\w+)(?:\\(((?:\\\\.|[^)])*)\\))?|\\(((?:\\\\.|[^)])*)\\))([+*?])?',
-  // Match regexp special characters that are always escaped.
-  '([.+*?=^!:${}()[\\]|\\/])'
-].join('|'), 'g');
+  // "/:test(\\d+)?" => ["/", "test", "\d+", undefined, "?", undefined]
+  // "/route(\\d+)"  => [undefined, undefined, undefined, "\d+", undefined, undefined]
+  // "/*"            => ["/", undefined, undefined, undefined, undefined, "*"]
+  '([\\/.])?(?:(?:\\:(\\w+)(?:\\(((?:\\\\.|[^()])+)\\))?|\\(((?:\\\\.|[^()])+)\\))([+*?])?|(\\*))'
+].join('|'), 'g')
+
+/**
+ * Parse a string for the raw tokens.
+ *
+ * @param  {String} str
+ * @return {Array}
+ */
+function parse (str) {
+  var tokens = []
+  var key = 0
+  var index = 0
+  var path = ''
+  var res
+
+  while ((res = PATH_REGEXP.exec(str)) != null) {
+    var m = res[0]
+    var escaped = res[1]
+    var offset = res.index
+    path += str.slice(index, offset)
+    index = offset + m.length
+
+    // Ignore already escaped sequences.
+    if (escaped) {
+      path += escaped[1]
+      continue
+    }
+
+    // Push the current path onto the tokens.
+    if (path) {
+      tokens.push(path)
+      path = ''
+    }
+
+    var prefix = res[2]
+    var name = res[3]
+    var capture = res[4]
+    var group = res[5]
+    var suffix = res[6]
+    var asterisk = res[7]
+
+    var repeat = suffix === '+' || suffix === '*'
+    var optional = suffix === '?' || suffix === '*'
+    var delimiter = prefix || '/'
+    var pattern = capture || group || (asterisk ? '.*' : '[^' + delimiter + ']+?')
+
+    tokens.push({
+      name: name || key++,
+      prefix: prefix || '',
+      delimiter: delimiter,
+      optional: optional,
+      repeat: repeat,
+      pattern: escapeGroup(pattern)
+    })
+  }
+
+  // Match any characters still remaining.
+  if (index < str.length) {
+    path += str.substr(index)
+  }
+
+  // If the path exists, push it onto the end.
+  if (path) {
+    tokens.push(path)
+  }
+
+  return tokens
+}
+
+/**
+ * Compile a string to a template function for the path.
+ *
+ * @param  {String}   str
+ * @return {Function}
+ */
+function compile (str) {
+  return tokensToFunction(parse(str))
+}
+
+/**
+ * Expose a method for transforming tokens into the path function.
+ */
+function tokensToFunction (tokens) {
+  // Compile all the tokens into regexps.
+  var matches = new Array(tokens.length)
+
+  // Compile all the patterns before compilation.
+  for (var i = 0; i < tokens.length; i++) {
+    if (typeof tokens[i] === 'object') {
+      matches[i] = new RegExp('^' + tokens[i].pattern + '$')
+    }
+  }
+
+  return function (obj) {
+    var path = ''
+    var data = obj || {}
+
+    for (var i = 0; i < tokens.length; i++) {
+      var token = tokens[i]
+
+      if (typeof token === 'string') {
+        path += token
+
+        continue
+      }
+
+      var value = data[token.name]
+      var segment
+
+      if (value == null) {
+        if (token.optional) {
+          continue
+        } else {
+          throw new TypeError('Expected "' + token.name + '" to be defined')
+        }
+      }
+
+      if (isarray(value)) {
+        if (!token.repeat) {
+          throw new TypeError('Expected "' + token.name + '" to not repeat, but received "' + value + '"')
+        }
+
+        if (value.length === 0) {
+          if (token.optional) {
+            continue
+          } else {
+            throw new TypeError('Expected "' + token.name + '" to not be empty')
+          }
+        }
+
+        for (var j = 0; j < value.length; j++) {
+          segment = encodeURIComponent(value[j])
+
+          if (!matches[i].test(segment)) {
+            throw new TypeError('Expected all "' + token.name + '" to match "' + token.pattern + '", but received "' + segment + '"')
+          }
+
+          path += (j === 0 ? token.prefix : token.delimiter) + segment
+        }
+
+        continue
+      }
+
+      segment = encodeURIComponent(value)
+
+      if (!matches[i].test(segment)) {
+        throw new TypeError('Expected "' + token.name + '" to match "' + token.pattern + '", but received "' + segment + '"')
+      }
+
+      path += token.prefix + segment
+    }
+
+    return path
+  }
+}
+
+/**
+ * Escape a regular expression string.
+ *
+ * @param  {String} str
+ * @return {String}
+ */
+function escapeString (str) {
+  return str.replace(/([.+*?=^!:${}()[\]|\/])/g, '\\$1')
+}
 
 /**
  * Escape the capturing group by escaping special characters and meaning.
@@ -19723,7 +20890,7 @@ var PATH_REGEXP = new RegExp([
  * @return {String}
  */
 function escapeGroup (group) {
-  return group.replace(/([=!:$\/()])/g, '\\$1');
+  return group.replace(/([=!:$\/()])/g, '\\$1')
 }
 
 /**
@@ -19734,8 +20901,8 @@ function escapeGroup (group) {
  * @return {RegExp}
  */
 function attachKeys (re, keys) {
-  re.keys = keys;
-  return re;
+  re.keys = keys
+  return re
 }
 
 /**
@@ -19745,7 +20912,7 @@ function attachKeys (re, keys) {
  * @return {String}
  */
 function flags (options) {
-  return options.sensitive ? '' : 'i';
+  return options.sensitive ? '' : 'i'
 }
 
 /**
@@ -19757,20 +20924,22 @@ function flags (options) {
  */
 function regexpToRegexp (path, keys) {
   // Use a negative lookahead to match only capturing groups.
-  var groups = path.source.match(/\((?!\?)/g);
+  var groups = path.source.match(/\((?!\?)/g)
 
   if (groups) {
     for (var i = 0; i < groups.length; i++) {
       keys.push({
-        name:      i,
+        name: i,
+        prefix: null,
         delimiter: null,
-        optional:  false,
-        repeat:    false
-      });
+        optional: false,
+        repeat: false,
+        pattern: null
+      })
     }
   }
 
-  return attachKeys(path, keys);
+  return attachKeys(path, keys)
 }
 
 /**
@@ -19782,61 +20951,101 @@ function regexpToRegexp (path, keys) {
  * @return {RegExp}
  */
 function arrayToRegexp (path, keys, options) {
-  var parts = [];
+  var parts = []
 
   for (var i = 0; i < path.length; i++) {
-    parts.push(pathToRegexp(path[i], keys, options).source);
+    parts.push(pathToRegexp(path[i], keys, options).source)
   }
 
-  var regexp = new RegExp('(?:' + parts.join('|') + ')', flags(options));
-  return attachKeys(regexp, keys);
+  var regexp = new RegExp('(?:' + parts.join('|') + ')', flags(options))
+
+  return attachKeys(regexp, keys)
 }
 
 /**
- * Replace the specific tags with regexp strings.
+ * Create a path regexp from string input.
  *
  * @param  {String} path
  * @param  {Array}  keys
- * @return {String}
+ * @param  {Object} options
+ * @return {RegExp}
  */
-function replacePath (path, keys) {
-  var index = 0;
+function stringToRegexp (path, keys, options) {
+  var tokens = parse(path)
+  var re = tokensToRegExp(tokens, options)
 
-  function replace (_, escaped, prefix, key, capture, group, suffix, escape) {
-    if (escaped) {
-      return escaped;
+  // Attach keys back to the regexp.
+  for (var i = 0; i < tokens.length; i++) {
+    if (typeof tokens[i] !== 'string') {
+      keys.push(tokens[i])
     }
-
-    if (escape) {
-      return '\\' + escape;
-    }
-
-    var repeat   = suffix === '+' || suffix === '*';
-    var optional = suffix === '?' || suffix === '*';
-
-    keys.push({
-      name:      key || index++,
-      delimiter: prefix || '/',
-      optional:  optional,
-      repeat:    repeat
-    });
-
-    prefix = prefix ? ('\\' + prefix) : '';
-    capture = escapeGroup(capture || group || '[^' + (prefix || '\\/') + ']+?');
-
-    if (repeat) {
-      capture = capture + '(?:' + prefix + capture + ')*';
-    }
-
-    if (optional) {
-      return '(?:' + prefix + '(' + capture + '))?';
-    }
-
-    // Basic parameter support.
-    return prefix + '(' + capture + ')';
   }
 
-  return path.replace(PATH_REGEXP, replace);
+  return attachKeys(re, keys)
+}
+
+/**
+ * Expose a function for taking tokens and returning a RegExp.
+ *
+ * @param  {Array}  tokens
+ * @param  {Array}  keys
+ * @param  {Object} options
+ * @return {RegExp}
+ */
+function tokensToRegExp (tokens, options) {
+  options = options || {}
+
+  var strict = options.strict
+  var end = options.end !== false
+  var route = ''
+  var lastToken = tokens[tokens.length - 1]
+  var endsWithSlash = typeof lastToken === 'string' && /\/$/.test(lastToken)
+
+  // Iterate over the tokens and create our regexp string.
+  for (var i = 0; i < tokens.length; i++) {
+    var token = tokens[i]
+
+    if (typeof token === 'string') {
+      route += escapeString(token)
+    } else {
+      var prefix = escapeString(token.prefix)
+      var capture = token.pattern
+
+      if (token.repeat) {
+        capture += '(?:' + prefix + capture + ')*'
+      }
+
+      if (token.optional) {
+        if (prefix) {
+          capture = '(?:' + prefix + '(' + capture + '))?'
+        } else {
+          capture = '(' + capture + ')?'
+        }
+      } else {
+        capture = prefix + '(' + capture + ')'
+      }
+
+      route += capture
+    }
+  }
+
+  // In non-strict mode we allow a slash at the end of match. If the path to
+  // match already ends with a slash, we remove it for consistency. The slash
+  // is valid at the end of a path match, not in the middle. This is important
+  // in non-ending mode, where "/test/" shouldn't match "/test//route".
+  if (!strict) {
+    route = (endsWithSlash ? route.slice(0, -2) : route) + '(?:\\/(?=$))?'
+  }
+
+  if (end) {
+    route += '$'
+  } else {
+    // In non-ending mode, we need the capturing groups to match as much as
+    // possible by using a positive lookahead to the end or next path segment.
+    route += strict && endsWithSlash ? '' : '(?=\\/|$)'
+  }
+
+  return new RegExp('^' + route, flags(options))
 }
 
 /**
@@ -19852,45 +21061,24 @@ function replacePath (path, keys) {
  * @return {RegExp}
  */
 function pathToRegexp (path, keys, options) {
-  keys = keys || [];
+  keys = keys || []
 
-  if (!isArray(keys)) {
-    options = keys;
-    keys = [];
+  if (!isarray(keys)) {
+    options = keys
+    keys = []
   } else if (!options) {
-    options = {};
+    options = {}
   }
 
   if (path instanceof RegExp) {
-    return regexpToRegexp(path, keys, options);
+    return regexpToRegexp(path, keys, options)
   }
 
-  if (isArray(path)) {
-    return arrayToRegexp(path, keys, options);
+  if (isarray(path)) {
+    return arrayToRegexp(path, keys, options)
   }
 
-  var strict = options.strict;
-  var end = options.end !== false;
-  var route = replacePath(path, keys);
-  var endsWithSlash = path.charAt(path.length - 1) === '/';
-
-  // In non-strict mode we allow a slash at the end of match. If the path to
-  // match already ends with a slash, we remove it for consistency. The slash
-  // is valid at the end of a path match, not in the middle. This is important
-  // in non-ending mode, where "/test/" shouldn't match "/test//route".
-  if (!strict) {
-    route = (endsWithSlash ? route.slice(0, -2) : route) + '(?:\\/(?=$))?';
-  }
-
-  if (end) {
-    route += '$';
-  } else {
-    // In non-ending mode, we need the capturing groups to match as much as
-    // possible by using a positive lookahead to the end or next path segment.
-    route += strict && endsWithSlash ? '' : '(?=\\/|$)';
-  }
-
-  return attachKeys(new RegExp('^' + route, flags(options)), keys);
+  return stringToRegexp(path, keys, options)
 }
 
 },{"isarray":4}],4:[function(require,module,exports){
@@ -19903,8 +21091,8 @@ module.exports = Array.isArray || function (arr) {
 <script>
     function trackPageview(path) { // jshint ignore:line
         /* jshint ignore:start */
-        ga('set', 'page', path);
-        ga('send', 'pageview');
+        // ga('set', 'page', path);
+        // ga('send', 'pageview');
         /* jshint ignore:end */
     }
 
@@ -19952,6 +21140,18 @@ module.exports = Array.isArray || function (arr) {
 
         page.exit('/speakers/:id', function() {
             document.querySelector('#people-block').closePerson();
+        });
+
+        page('/schedule', function() {
+            trackPageview('/schedule');
+            app.route = 'schedule';
+            app.scrollToTop();
+        });
+        page('/schedule/:id', function(data) {
+            trackPageview('/schedule/' + data.params.id);
+            app.route = 'schedule';
+            app.params = data.params;
+            // document.querySelector('#schedule-block').checkParams();
         });
 
         page('/team', function() {
@@ -27663,8 +28863,23 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 </dom-module>
 
 <script>
-
 (function() {
+
+  function setupDragHandler_() {
+    if (this.draggable) {
+      this.dragHandler_ = google.maps.event.addListener(
+          this.marker, 'dragend', onDragEnd_.bind(this));
+    } else {
+      google.maps.event.removeListener(this.dragHandler_);
+      this.dragHandler_ = null;
+    }
+  }
+
+  function onDragEnd_(e, details, sender) {
+    this.latitude = e.latLng.lat();
+    this.longitude = e.latLng.lng();
+  }
+
   Polymer({
 
     is: 'google-map-marker',
@@ -27674,45 +28889,63 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
      * @param {google.maps.MouseEvent} event The mouse event.
      * @event google-map-marker-click
      */
+
     /**
      * Fired when the marker icon was double clicked. Requires the clickEvents attribute to be true.
      * @param {google.maps.MouseEvent} event The mouse event.
      * @event google-map-marker-dblclick
      */
+
     /**
      * Fired for a mousedown on the marker. Requires the mouseEvents attribute to be true.
      * @event google-map-marker-mousedown
      * @param {google.maps.MouseEvent} event The mouse event.
      */
+
     /**
      * Fired when the DOM `mousemove` event is fired on the marker. Requires the mouseEvents
      * attribute to be true.
      * @event google-map-marker-mousemove
      * @param {google.maps.MouseEvent} event The mouse event.
      */
+
     /**
      * Fired when the mouse leaves the area of the marker icon. Requires the mouseEvents attribute to be
      * true.
      * @event google-map-marker-mouseout
      * @param {google.maps.MouseEvent} event The mouse event.
      */
+
     /**
      * Fired when the mouse enters the area of the marker icon. Requires the mouseEvents attribute to be
      * true.
      * @event google-map-marker-mouseover
      * @param {google.maps.MouseEvent} event The mouse event.
      */
+
     /**
      * Fired for a mouseup on the marker. Requires the mouseEvents attribute to be true.
      *
      * @event google-map-marker-mouseup
      * @param {google.maps.MouseEvent} event The mouse event.
      */
+
     /**
      * Fired for a rightclick on the marker. Requires the clickEvents attribute to be true.
      * @event google-map-marker-rightclick
      * @param {google.maps.MouseEvent} event The mouse event.
      */
+
+    /**
+     * Fired when an infowindow is opened.
+     * @event google-map-marker-open
+     */
+
+    /**
+     * Fired when the close button of the infowindow is pressed.
+     * @event google-map-marker-close
+     */
+
     properties: {
       /**
        * A Google Maps marker object.
@@ -27782,6 +29015,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         value: null,
         reflectToAttribute: true
       },
+
       /**
        * The marker's latitude coordinate.
        */
@@ -27789,6 +29023,25 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         type: Number,
         value: null,
         reflectToAttribute: true
+      },
+
+      /**
+       * A animation for the marker. "DROP" or "BOUNCE". See
+       * https://developers.google.com/maps/documentation/javascript/examples/marker-animations.
+       */
+      animation: {
+        type: String,
+        value: null,
+        observer: '_animationChanged'
+      },
+
+      /**
+       * Specifies whether the InfoWindow is open or not
+       */
+      open: {
+        type: Boolean,
+        value: false,
+        observer: '_openChanged'
       }
     },
 
@@ -27852,6 +29105,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
     },
 
+    _animationChanged: function() {
+      if (this.marker) {
+        this.marker.setAnimation(google.maps.Animation[this.animation]);
+      }
+    },
+
     _iconChanged: function() {
       if (this.marker) {
         this.marker.setIcon(this.icon);
@@ -27891,16 +29150,33 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         if (!this.info) {
           // Create a new infowindow
           this.info = new google.maps.InfoWindow();
-          this.infoHandler_ = google.maps.event.addListener(this.marker, 'click', function() {
-            this.info.open(this.map, this.marker);
+          this.openInfoHandler_ = google.maps.event.addListener(this.marker, 'click', function() {
+            this.open = true;
+          }.bind(this));
+
+          this.closeInfoHandler_ = google.maps.event.addListener(this.info, 'closeclick', function() {
+            this.open = false;
           }.bind(this));
         }
         this.info.setContent(content);
       } else {
         if (this.info) {
           // Destroy the existing infowindow.  It doesn't make sense to have an empty one.
-          google.maps.event.removeListener(this.infoHandler_);
+          google.maps.event.removeListener(this.openInfoHandler_);
+          google.maps.event.removeListener(this.closeInfoHandler_);
           this.info = null;
+        }
+      }
+    },
+
+    _openChanged: function() {
+      if (this.info) {
+        if (this.open) {
+          this.info.open(this.map, this.marker);
+          this.fire('google-map-marker-open');
+        } else {
+          this.info.close();
+          this.fire('google-map-marker-close');
         }
       }
     },
@@ -27909,8 +29185,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       this._listeners = {};
       this.marker = new google.maps.Marker({
         map: this.map,
-        position: new google.maps.LatLng(this.latitude, this.longitude),
+        position: {
+          lat: parseFloat(this.latitude),
+          lng: parseFloat(this.longitude)
+        },
         title: this.title,
+        animation: google.maps.Animation[this.animation],
         draggable: this.draggable,
         visible: !this.hidden,
         icon: this.icon,
@@ -27920,6 +29200,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       this._clickEventsChanged();
       this._contentChanged();
       this._mouseEventsChanged();
+      this._openChanged();
       setupDragHandler_.bind(this)();
     },
 
@@ -27957,20 +29238,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     }
   });
 
-  function setupDragHandler_() {
-    if (this.draggable) {
-      this.dragHandler_ = google.maps.event.addListener(
-          this.marker, 'dragend', onDragEnd_.bind(this));
-    } else {
-      google.maps.event.removeListener(this.dragHandler_);
-      this.dragHandler_ = null;
-    }
-  }
-
-  function onDragEnd_(e, details, sender) {
-    this.latitude = e.latLng.lat();
-    this.longitude = e.latLng.lng();
-  }
 })();
 </script>
 <dom-module id="google-map" assetpath="../bower_components/google-map/">
@@ -27992,12 +29259,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
   </style>
   <template>
-    <google-maps-api id="api" api-key="[[apiKey]]" client-id="[[clientId]]" version="[[version]]" libraries="[[libraries]]" signed-in="[[signedIn]]" language="[[language]]" on-api-load="_mapApiLoaded"></google-maps-api>
+    <google-maps-api id="api" api-key="[[apiKey]]" client-id="[[clientId]]" version="[[version]]" signed-in="[[signedIn]]" language="[[language]]" on-api-load="_mapApiLoaded"></google-maps-api>
 
     <div id="map"></div>
 
-    <content id="markers" select="google-map-marker"></content>
-
+    <iron-selector id="selector" multi="[[!singleInfoWindow]]" selected-attribute="open" activate-event="google-map-marker-open" on-google-map-marker-close="_deselectMarker">
+      <content id="markers" select="google-map-marker"></content>
+    </iron-selector>
+    <content id="objects" select="*"></content>
   </template>
 </dom-module>
 
@@ -28090,16 +29359,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       },
 
       /**
-       * A comma separated list (e.g. "places,geometry") of libraries to load
-       * with this map. Defaults to "places". For more information see
-       * https://developers.google.com/maps/documentation/javascript/libraries.
-       */
-      libraries: {
-        type: String,
-        value: 'places'
-      },
-
-      /**
        * A longitude to center the map on.
        */
       longitude: {
@@ -28110,12 +29369,22 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       },
 
       /**
+       * A kml file to load.
+       */
+      kml: {
+        type: String,
+        value: null,
+        observer: '_loadKml'
+      },
+
+      /**
        * A zoom level to set the map to.
        */
       zoom: {
         type: Number,
         value: 10,
-        observer: '_zoomChanged'
+        observer: '_zoomChanged',
+        notify: true
       },
 
       /**
@@ -28132,7 +29401,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       mapType: {
         type: String,
         value: 'roadmap', // roadmap, satellite, hybrid, terrain,
-        observer: '_mapTypeChanged'
+        observer: '_mapTypeChanged',
+        notify: true
       },
 
       /**
@@ -28247,6 +29517,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
        * Use to specify additional options we do not expose as
        * properties.
        * Ex: `<google-map additional-map-options='{"mapTypeId":"satellite"}'>`
+       *
+       * Note, you can't use API enums like `google.maps.ControlPosition.TOP_RIGHT`
+       * when using this property as an HTML attribute. Instead, use the actual
+       * value (e.g. `3`) or set `.additionalMapOptions` in JS rather than using
+       * the attribute.
        */
       additionalMapOptions: {
         type: Object,
@@ -28260,8 +29535,24 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         type: Array,
         value: function() { return []; },
         readOnly: true
-      }
+      },
 
+      /**
+       * The non-marker objects on the map.
+       */
+      objects: {
+        type: Array,
+        value: function() { return []; },
+        readOnly: true
+      },
+
+      /**
+       * If set, all other info windows on markers are closed when opening a new one.
+       */
+      singleInfoWindow: {
+        type: Boolean,
+        value: false
+      }
     },
 
     behaviors: [
@@ -28285,6 +29576,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         this._mutationObserver.disconnect();
         this._mutationObserver = null;
       }
+      if (this._objectsMutationObserver) {
+        this._objectsMutationObserver.disconnect();
+        this._objectsMutationObserver = null;
+      }
     },
 
     _initGMap: function() {
@@ -28301,7 +29596,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       this.map = new google.maps.Map(this.$.map, this._getMapOptions());
       this._listeners = {};
       this._updateCenter();
+      this._loadKml();
       this._updateMarkers();
+      this._updateObjects();
       this._addMapListeners();
       this.fire('google-map-ready');
     },
@@ -28334,14 +29631,22 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       return mapOptions;
     },
 
-    // watch for future updates
+    _attachChildrenToMap: function(children) {
+      if (this.map) {
+        for (var i = 0, child; child = children[i]; ++i) {
+          child.map = this.map;
+        }
+      }
+    },
+
+    // watch for future updates to marker objects
     _observeMarkers: function() {
       // Watch for future updates.
       if (this._mutationObserver) {
         return;
       }
-      this._mutationObserver = new MutationObserver( this._updateMarkers.bind(this));
-      this._mutationObserver.observe(this, {
+      this._mutationObserver = new MutationObserver(this._updateMarkers.bind(this));
+      this._mutationObserver.observe(this.$.selector, {
         childList: true
       });
     },
@@ -28369,14 +29674,42 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       this.markers = this._setMarkers(newMarkers);
 
       // Set the map on each marker and zoom viewport to ensure they're in view.
-      if (this.markers.length && this.map) {
-        for (var i = 0, m; m = this.markers[i]; ++i) {
-          m.map = this.map;
-        }
-      }
+      this._attachChildrenToMap(this.markers);
       if (this.fitToMarkers) {
         this._fitToMarkersChanged();
       }
+    },
+
+    // watch for future updates to non-marker objects
+    _observeObjects: function() {
+      if (this._objectsMutationObserver) {
+        return;
+      }
+      this._objectsMutationObserver = new MutationObserver(this._updateObjects.bind(this));
+      this._objectsMutationObserver.observe(this, {
+        childList: true
+      });
+    },
+
+    _updateObjects: function() {
+      var newObjects = Array.prototype.slice.call(
+          Polymer.dom(this.$.objects).getDistributedNodes());
+
+      // Do not recompute if objects have not been added or removed.
+      if (newObjects.length === this.objects.length) {
+        var added = newObjects.filter(function(o) {
+          return this.objects.indexOf(o) === -1;
+        }.bind(this));
+        if (added.length === 0) {
+          // Set up observer first time around.
+          this._observeObjects();
+          return;
+        }
+      }
+
+      this._observeObjects();
+      this._setObjects(newObjects);
+      this._attachChildrenToMap(this.objects);
     },
 
     /**
@@ -28409,6 +29742,15 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         if (this.fitToMarkers) { // we might not have a center if we are doing fit-to-markers
           this._fitToMarkersChanged();
         }
+      }
+    },
+
+    _loadKml: function() {
+      if (this.kml) {
+        var kmlfile = new google.maps.KmlLayer({
+          url: this.kml,
+          map: this.map
+        });
       }
     },
 
@@ -28546,7 +29888,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     _fitToMarkersChanged: function() {
       // TODO(ericbidelman): respect user's zoom level.
 
-      if (this.map && this.fitToMarkers) {
+      if (this.map && this.fitToMarkers && this.markers.length > 0) {
         var latLngBounds = new google.maps.LatLngBounds();
         for (var i = 0, m; m = this.markers[i]; ++i) {
           latLngBounds.extend(
@@ -28573,6 +29915,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         this.zoom = this.map.getZoom();
       }.bind(this));
 
+      google.maps.event.addListener(this.map, 'maptypeid_changed', function() {
+        this.mapType = this.map.getMapTypeId();
+      }.bind(this));
+
       this._clickEventsChanged();
       this._dragEventsChanged();
       this._mouseEventsChanged();
@@ -28589,7 +29935,19 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       this._listeners[name] = google.maps.event.addListener(this.map, name, function(event) {
         this.fire('google-map-' + name, event);
       }.bind(this));
-    }
+    },
+
+   _deselectMarker: function(e, detail) {
+     // If singleInfoWindow is set, update iron-selector's selected attribute to be null.
+     // Else remove the marker from iron-selector's selected array.
+     var markerIndex = this.$.selector.indexOf(e.target);
+
+     if (this.singleInfoWindow) {
+      this.$.selector.selected = null;
+     } else if (this.$.selector.selectedValues) {
+      this.$.selector.selectedValues = this.$.selector.selectedValues.filter(function(i) {return i !== markerIndex});
+     }
+   }
 
   });
 
@@ -29386,10 +30744,1947 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     }
   });
 </script>
-<dom-module id="marked-element" assetpath="../bower_components/marked-element/">
+<dom-module id="google-client-loader" assetpath="../bower_components/google-apis/">
+  <template>
+    <google-js-api on-js-api-load="_loadClient"></google-js-api>
+  </template>
+</dom-module>
+
+<script>
+  (function() {
+    'use strict';
+
+    // Stores whether the API client is done loading.
+    var _clientLoaded = false;
+
+    // Loaders and loading statuses for all APIs, indexed by API name.
+    // This helps prevent multiple loading requests being fired at the same time
+    // by multiple google-api-loader elements.
+    var _statuses = {};
+    var _loaders = {};
+
+    Polymer({
+
+      is: 'google-client-loader',
+
+      /**
+       * Fired when the requested API is loaded. Override this name
+       * by setting `successEventName`.
+       * @event google-api-load
+       */
+
+      /**
+       * Fired if an error occurs while loading the requested API. Override this name
+       * by setting `errorEventName`.
+       * @event google-api-load-error
+       */
+
+      properties: {
+        /**
+         * Name of the API to load, e.g. 'urlshortener'.
+         *
+         * You can find the full list of APIs on the
+         * <a href="https://developers.google.com/apis-explorer"> Google APIs
+         * Explorer</a>.
+         */
+        name: String,
+
+        /**
+         * Version of the API to load, e.g. 'v1'.
+         */
+        version: String,
+
+        /**
+         * App Engine application ID for loading a Google Cloud Endpoints API.
+         */
+        appId: String,
+
+        /**
+         * Root URL where to load the API from, e.g. 'http://host/apis'.
+         * For App Engine dev server this would be something like:
+         * 'http://localhost:8080/_ah/api'.
+         * Overrides 'appId' if both are specified.
+         */
+        apiRoot: String,
+
+        /**
+         * Name of the event fired when API library is loaded.
+         */
+        successEventName: {
+          type: String,
+          value: 'google-api-load'
+        },
+
+        /**
+         * Name of the event fired when there is an error loading the library.
+         */
+        errorEventName: {
+          type: String,
+          value: 'google-api-load-error'
+        }
+      },
+
+      // Used to fix events potentially being fired multiple times by
+      // iron-jsonp-library.
+      _waiting: false,
+
+      /**
+       * Returns the loaded API.
+       * @type gapi.client
+       */
+      get api() {
+        if (window.gapi && window.gapi.client &&
+            window.gapi.client[this.name]) {
+          return window.gapi.client[this.name];
+        } else {
+          return undefined;
+        }
+      },
+
+      /**
+       * Wrapper for `gapi.auth`.
+       */
+      get auth() {
+        return gapi.auth;
+      },
+
+      _loadClient: function() {
+        gapi.load('client', this._doneLoadingClient.bind(this));
+      },
+
+      _handleLoadResponse: function(response) {
+        if (response && response.error) {
+          _statuses[this.name] = 'error';
+          this._fireError(response);
+        } else {
+          _statuses[this.name] = 'loaded';
+          this._fireSuccess();
+        }
+      },
+
+      _fireSuccess: function() {
+        this.fire(this.successEventName,
+            { 'name': this.name, 'version': this.version });
+      },
+
+      _fireError: function(response) {
+        if (response && response.error) {
+          this.fire(this.errorEventName, {
+            'name': this.name,
+            'version': this.version,
+            'error': response.error });
+        } else {
+          this.fire(this.errorEventName, {
+            'name': this.name,
+            'version': this.version });
+        }
+      },
+
+      _doneLoadingClient: function() {
+        _clientLoaded = true;
+        // Fix for API client load event being fired multiple times by
+        // iron-jsonp-library.
+        if (!this._waiting) {
+          this._loadApi();
+        }
+      },
+
+      _createSelfRemovingListener: function(eventName) {
+        var handler = function () {
+          _loaders[this.name].removeEventListener(eventName, handler);
+          this._loadApi();
+        }.bind(this);
+
+        return handler;
+      },
+
+      _loadApi: function() {
+        if (_clientLoaded && this.name && this.version) {
+          this._waiting = false;
+          // Is this API already loaded?
+          if (_statuses[this.name] == 'loaded') {
+            this._fireSuccess();
+          // Is a different google-api-loader already loading this API?
+          } else if (_statuses[this.name] == 'loading') {
+            this._waiting = true;
+            _loaders[this.name].addEventListener(this.successEventName,
+                this._createSelfRemovingListener(this.successEventName));
+            _loaders[this.name].addEventListener(this.errorEventName,
+                this._createSelfRemovingListener(this.errorEventName));
+          // Did we get an error when we tried to load this API before?
+          } else if (_statuses[this.name] == 'error') {
+            this._fireError();
+          // Otherwise, looks like we're loading a new API.
+          } else {
+            var root;
+            if (this.apiRoot) {
+              root = this.apiRoot;
+            } else if (this.appId) {
+              root = 'https://' + this.appId + '.appspot.com/_ah/api';
+            }
+            _statuses[this.name] = 'loading';
+            _loaders[this.name] = this;
+            gapi.client.load(this.name, this.version,
+                this._handleLoadResponse.bind(this), root);
+          }
+        }
+      }
+    });
+  })();
+</script>
+<dom-module id="google-analytics-loader" assetpath="../bower_components/google-analytics/">
 
   <template>
-    <div id="content"></div>
+    <google-client-loader id="api" name="analytics" version="v3" on-google-api-load="handleApiLoad" on-google-api-load-error="handleApiFailedToLoad"></google-client-loader>
+    <google-signin-aware scopes="https://www.googleapis.com/auth/analytics.readonly" on-google-signin-aware-success="handleAuthSuccess" on-google-signin-aware-signed-out="handleAuthSignout"></google-signin-aware>
+  </template>
+
+</dom-module>
+
+<script>
+
+  (function() {
+
+    'use strict';
+
+    Polymer({
+
+      is: 'google-analytics-loader',
+
+      properties: {
+        /**
+         * True when user is authorized, and api is loaded
+         * @attribute allReady
+         * @type {Boolean}
+         */
+        allReady: {
+          type: Boolean,
+          computed: 'computeAllReady(apiReady, authorized)',
+          notify: true
+        },
+        /**
+         * True when api is loaded
+         * @attribute apiReady
+         * @type {Boolean}
+         */
+        apiReady: {
+          type: Boolean,
+          value: false,
+          notify: true,
+          readOnly: true
+        },
+        /**
+         * True when user is authorized
+         * @attribute authorized
+         * @type {Boolean}
+         */
+        authorized: {
+          type: Boolean,
+          value: false,
+          notify: true,
+          readOnly: true
+        }
+      },
+
+      computeAllReady: function(apiReady, authorized) {
+        return apiReady && authorized;
+      },
+
+      handleApiLoad: function() {
+        this._setApiReady(true);
+      },
+
+      handleApiFailedToLoad: function(ev, detail) {
+        this._setApiReady(false);
+        console.error("Api failed to load: ", this.$.api.name, this.$.api.version);
+      },
+
+      handleAuthSuccess: function() {
+        this._setAuthorized(true);
+      },
+
+      handleAuthSignout: function() {
+        this._setAuthorized(false);
+      }
+    });
+
+  }());
+
+</script>
+<dom-module id="google-analytics-query" assetpath="../bower_components/google-analytics/">
+
+  <template>
+    <google-analytics-loader all-ready="{{setupReady}}"></google-analytics-loader>
+  </template>
+
+</dom-module>
+
+<script>
+
+  (function() {
+
+    'use strict';
+
+    Polymer({
+
+      is: 'google-analytics-query',
+        /**
+         * Fired when a query is successfully run and data has been stored.
+         *
+         * @event analytics-query-success
+         */
+
+        /**
+         * Fired when an error occurs while running a query.
+         *
+         * @event analytics-query-error
+         */
+
+      properties: {
+
+        /**
+         * The `data` attribute is the response from a query to the Google
+         * Analytics Core Reporting API. This value will be updated as
+         * subsequent requests are made.
+         *
+         * @attribute data
+         * @type object
+         */
+        data: {
+          type: Object,
+          value: function() { return {}},
+          notify: true
+        },
+
+        /**
+         * The `ids` attribute is the unique table ID of the form ga:XXXX,
+         * where XXXX is the Analytics view (profile) ID for which the query
+         * will retrieve the data.
+         *
+         * See the <a href="https://developers.google.com/analytics/devguides/reporting/core/v3/reference#ids">Core Reporting API parameter reference</a> for more details.
+         *
+         * Note: you can find out the `ids` value for any of your Google Analytics account using the <a href="https://ga-dev-tools.appspot.com/explorer/">Google Analytics query explorer</a>.
+         *
+         * @attribute ids
+         * @type string
+         */
+        ids: {
+          type: String,
+          value: ''
+        },
+
+        /**
+         * The `startDate` attribute is the start date for fetching Analytics
+         * data. Requests can specify a start date formatted as YYYY-MM-DD, or
+         * as a relative date (e.g., today, yesterday, or NdaysAgo where N is a
+         * positive integer).
+         *
+         * See the <a href="https://developers.google.com/analytics/devguides/reporting/core/v3/reference#startDate">Core Reporting API parameter reference</a> for more details.
+         *
+         * @attribute startDate
+         * @default '7daysAgo'
+         * @type string
+         */
+        startDate: {
+          type: String,
+          value: '7daysAgo'
+        },
+
+        /**
+         * The `endDate` attribute is the end date for fetching Analytics
+         * data. Requests can specify an end date formatted as YYYY-MM-DD, or
+         * as a relative date (e.g., today, yesterday, or NdaysAgo where N is a
+         * positive integer).
+         *
+         * See the <a href="https://developers.google.com/analytics/devguides/reporting/core/v3/reference#endDate">Core Reporting API parameter reference</a> for more details.
+         *
+         * @attribute endDate
+         * @default 'yesterday'
+         * @type string
+         */
+        endDate: {
+          type: String,
+          value: 'yesterday'
+        },
+
+        /**
+         * The `metrics` attribute is a list of comma-separated metrics,
+         * such as ga:sessions,ga:bounces.
+         *
+         * See the <a href="https://developers.google.com/analytics/devguides/reporting/core/v3/reference#metrics">Core Reporting API parameter reference</a> for more details.
+         *
+         * @attribute metrics
+         * @type string
+         */
+        metrics: {
+          type: String,
+          value: ''
+        },
+
+        /**
+         * The `dimensions` attribute is a list of comma-separated dimensions
+         * for your Analytics data, such as ga:browser,ga:city.
+         *
+         * See the <a href="https://developers.google.com/analytics/devguides/reporting/core/v3/reference#dimensions">Core Reporting API parameter reference</a> for more details.
+         *
+         * @attribute dimensions
+         * @type string
+         */
+        dimensions: {
+          type: String,
+          value: ''
+        },
+
+        /**
+         * The `sort` attribute is a list of comma-separated dimensions
+         * and metrics indicating the sorting order and sorting direction for
+         * the returned data.
+         *
+         * See the <a href="https://developers.google.com/analytics/devguides/reporting/core/v3/reference#sort">Core Reporting API parameter reference</a> for more details.
+         *
+         * @attribute sort
+         * @type string
+         */
+
+        sort: {
+          type: String,
+          value: ''
+        },
+        /**
+         * The `filters` attribute is dimension or metric filters that restrict
+         * the data returned for your request.
+         *
+         * See the <a href="https://developers.google.com/analytics/devguides/reporting/core/v3/reference#filters">Core Reporting API parameter reference</a> for more details.
+         *
+         * @attribute filters
+         * @type string
+         */
+        filters: {
+          type: String,
+          value: ''
+        },
+
+        /**
+         * The `segment` attribute segments the data returned for your
+         * request.
+         *
+         * See the <a href="https://developers.google.com/analytics/devguides/reporting/core/v3/reference#segment">Core Reporting API parameter reference</a> for more details.
+         *
+         * @attribute segment
+         * @type string
+         */
+        segment: {
+          type: String,
+          value: ''
+        },
+
+        /**
+         * The `samplingLevel` attribute sets the desired sampling level.
+         * Allowed Values: `DEFAULT`, `FASTER`, `HIGHER_PRECISION`.
+         *
+         * See the <a href="https://developers.google.com/analytics/devguides/reporting/core/v3/reference#samplingLevel">Core Reporting API parameter reference</a> for more details.
+         *
+         * @attribute samplingLevel
+         * @type string
+         */
+
+        samplingLevel: {
+          type: String,
+          value: ''
+        },
+
+        /**
+         * The `startIndex` attribute sets the first row of data to retrieve,
+         * starting at 1. Use this parameter as a pagination mechanism along
+         * with the max-results parameter.
+         *
+         * See the <a href="https://developers.google.com/analytics/devguides/reporting/core/v3/reference#startIndex">Core Reporting API parameter reference</a> for more details.
+         *
+         * @attribute startIndex
+         * @type integer
+         */
+        startIndex: {
+          type: Number,
+          value: 0
+        },
+
+        /**
+         * The `maxResults` attribute is the maximum number of rows to include
+         * in the response.
+         *
+         * See the <a href="https://developers.google.com/analytics/devguides/reporting/core/v3/reference#maxResults">Core Reporting API parameter reference</a> for more details.
+         *
+         * @attribute maxResults
+         * @type integer
+         */
+        maxResults: {
+          type: Number,
+          value: 0
+        },
+
+        /**
+         * The `output` attribute sets the desired output type for the
+         * Analytics data returned in the response. Acceptable values are json
+         * and dataTable.
+         *
+         * See the <a href="https://developers.google.com/analytics/devguides/reporting/core/v3/reference#output">Core Reporting API parameter reference</a> for more details.
+         *
+         * @attribute output
+         * @type string
+         */
+        output: {
+          type: String,
+          value: ''
+        },
+
+        /**
+         * The `fields` attribute is a selector specifying a subset of
+         * fields to include in the response.
+         *
+         * See the <a href="https://developers.google.com/analytics/devguides/reporting/core/v3/reference#fields">Core Reporting API parameter reference</a> for more details.
+         *
+         * @attribute fields
+         * @type string
+         */
+        fields: {
+          type: String,
+          value: ''
+        },
+
+        /**
+         * GA team internal variable for analytics purposes.
+         */
+        _srcParam: {
+          type: String,
+          value: 'gwc-ga-query'
+        },
+
+        /**
+         * true if data is getting loaded
+         * @attribute loading
+         * @type Boolean
+         */
+        loading: {
+          type: Boolean,
+          value: false,
+          notify: true
+        },
+
+        /**
+         *
+         *
+         * @attribute getDataResponseHandler
+         * @type Function
+         */
+        getDataResponseHandler: {
+          type: Function
+        },
+
+        /**
+         * True if setup is ready
+         *
+         * @attribute setupReady
+         * @type Boolean
+         */
+        setupReady: {
+          type: Boolean,
+          observer: '_setupReadyChanged'
+        }
+
+      },
+
+      observers: [
+        'getData(ids,startDate,endDate,metrics,dimensions,sort,filters,segment,samplingLevel,startIndex,maxResults,output,fields)'
+      ],
+
+      _setupReadyChanged: function(newVal) {
+        if (newVal)
+          this.getData();
+        else
+          this.data = null;
+      },
+
+      /**
+       * Query the Google Analytics Core Reporting API.
+       *
+       * @method getData
+       */
+      getData: function() {
+        if (this.setupReady && this._hasRequiredParams) {
+          this.loading = true;
+          // Required parameters.
+          var query = {
+            'ids': this.ids,
+            'start-date': this.startDate,
+            'end-date': this.endDate,
+            'metrics': this.metrics,
+            '_src': this._srcParam
+          };
+
+          // Optional parameters.
+          if (this.dimensions) query.dimensions = this.dimensions;
+          if (this.sort) query.sort = this.sort;
+          if (this.filters) query.filters = this.filters;
+          if (this.segment) query.segment = this.segment;
+          if (this.samplingLevel) query.samplingLevel = this.samplingLevel;
+          if (this.startIndex) query['start-index'] = this.startIndex;
+          if (this.maxResults) query['max-results'] = this.maxResults;
+          if (this.output) query.output = this.output;
+          if (this.fields) query.fields = this.fields;
+
+          gapi.client.analytics.data.ga.get(query)
+              .execute(this.handleResponse.bind(this));
+
+          return true;
+        }
+      },
+
+      /**
+       * setData sets data fetched by getData.
+       * Use it if you override getData response processing
+       * @method setData
+       */
+      setData: function(data) {
+        this.data = data;
+        this.fire('analytics-query-success', data);
+      },
+
+      /**
+       * The callback for the query run in `getData`. This is a separate
+       * function so subclasses can alter how the response is handled.
+       *
+       * @method handleResponse
+       */
+      handleResponse: function(response) {
+        this.loading = false;
+
+        if (response.error) {
+          this.fire('analytics-query-error', response.error);
+        }
+        else {
+          if (this.getDataResponseHandler)
+            this.getDataResponseHandler(response)
+          else
+            this.setData(response);
+        }
+      },
+
+      get _hasRequiredParams() {
+        return !!(this.ids && this.metrics && this.startDate && this.endDate);
+      },
+
+    });
+
+  }());
+
+</script>
+<dom-module id="google-chart" assetpath="../bower_components/google-chart/">
+  <style>
+:host {
+  display: -webkit-flex;
+  display: -ms-flex;
+  display: flex;
+  margin: 0;
+  padding: 0;
+  width: 400px;
+  height: 300px;
+}
+
+:host([type="gauge"]) {
+  width: 300px;
+  height: 300px;
+}
+
+#chartdiv {
+  width: 100%;
+}
+
+</style>
+  <template>
+    <iron-ajax id="ajax" handle-as="json" url="{{data}}" on-response="_externalDataLoaded"></iron-ajax>
+    <div id="chartdiv"></div>
+    <google-legacy-loader on-api-load="_readyForAction"></google-legacy-loader>
+  </template>
+</dom-module>
+
+<script>
+(function() {
+  "use strict";
+
+  Polymer({
+
+    is: 'google-chart',
+
+    /**
+     * Fired when the graph is displayed.
+     *
+     * @event google-chart-render
+     */
+
+    /**
+     * Fired when the user makes a selection in the chart.
+     *
+     * @event google-chart-select
+     * @param {object} detail
+     *   @param {array} detail.selection The user-defined selection.
+     */
+
+    properties: {
+      /**
+       * Sets the type of the chart.
+       *
+       * Should be one of:
+       * - `area`, `bar`, `bubble`, `candlestick`, `column`, `combo`, `geo`,
+       *   `histogram`, `line`, `pie`, `scatter`, `stepped-area`, `treemap`
+       *
+       * See <a href="https://google-developers.appspot.com/chart/interactive/docs/gallery">Google Visualization API reference (Chart Gallery)</a> for details.
+       *
+       */
+      type: {
+        type: String,
+        value: 'column',
+        observer: '_typeChanged'
+      },
+
+      /**
+       * Sets the options for the chart.
+       *
+       * Example:
+       * <pre>{
+       *   title: "Chart title goes here",
+       *   hAxis: {title: "Categories"},
+       *   vAxis: {title: "Values", minValue: 0, maxValue: 2},
+       *   legend: "none"
+       * };</pre>
+       * See <a href="https://google-developers.appspot.com/chart/interactive/docs/gallery">Google Visualization API reference (Chart Gallery)</a>
+       * for the options available to each chart type.
+       *
+       */
+      options: {
+        type: Object,
+        value: function() { return {}; }
+      },
+
+      /**
+       * Sets the data columns for this object.
+       *
+       * When specifying data with `cols` you must also specify `rows`, and
+       * not specify `data`.
+       *
+       * Example:
+       * <pre>[{label: "Categories", type: "string"},
+       *  {label: "Value", type: "number"}]</pre>
+       * See <a href="https://google-developers.appspot.com/chart/interactive/docs/reference#DataTable_addColumn">Google Visualization API reference (addColumn)</a>
+       * for column definition format.
+       *
+       * @attribute cols
+       * @type array
+       */
+      cols: {
+        type: Array,
+        value: function() { return []; }
+      },
+      /**
+       * Sets the data rows for this object.
+       *
+       * When specifying data with `rows` you must also specify `cols`, and
+       * not specify `data`.
+       *
+       * Example:
+       * <pre>[["Category 1", 1.0],
+       *  ["Category 2", 1.1]]</pre>
+       * See <a href="https://google-developers.appspot.com/chart/interactive/docs/reference#addrow">Google Visualization API reference (addRow)</a>
+       * for row format.
+       *
+       * @attribute rows
+       * @type array
+       */
+      rows: {
+        type: Array,
+        value: function() { return []; }
+      },
+
+      /**
+       * Sets the entire dataset for this object.
+       * Can be used to provide the data directly, or to provide a URL from
+       * which to request the data.
+       *
+       * The data format can be a two-dimensional array or the DataTable format
+       * expected by Google Charts.
+       * See <a href="https://google-developers.appspot.com/chart/interactive/docs/reference#DataTable">Google Visualization API reference (DataTable constructor)</a>
+       * for data table format details.
+       *
+       * When specifying data with `data` you must not specify `cols` or `rows`.
+       *
+       * Example:
+       * <pre>[["Categories", "Value"],
+       *  ["Category 1", 1.0],
+       *  ["Category 2", 1.1]]</pre>
+       *
+       * @attribute data
+       * @type array, object, or string
+       */
+      data: {
+        type: Object, // or array, or object
+        value: function() { return []; }
+      },
+
+      /**
+       * Selected datapoint(s) in the map.
+       *
+       * An array of objects, each with a numeric row and/or column property.
+       * `row` and `column` are the zero-based row or column number of an item
+       * in the data table to select.
+       *
+       * To select a whole column, set row to null;
+       * to select a whole row, set column to null.
+       *
+       * Example:
+       * <pre>
+       *   [{row:0,column:1}, {row:1, column:null}]
+       * </pre>
+       *
+       * @attribute selection
+       * @type array
+       */
+      selection: {
+        type: Array,
+        value: function() { return []; },
+        observer: '_selectionChanged'
+      },
+    },
+
+    observers: [
+      '_loadData(rows, cols, data)'
+    ],
+
+    _packages: null,
+
+    _chartObject: null,
+
+    _isReady: false,
+
+    _canDraw: false,
+
+    _dataTable: null,
+
+    _chartTypes: null,
+
+    _readyForAction: function(e, detail, sender) {
+      this._loadPackageByChartType();
+
+      google.load("visualization", "1", {
+        packages: this._packages[this.type],
+        callback: function() {
+          this._isReady = true;
+          this._loadChartTypes();
+          this._loadData();
+        }.bind(this)
+      });
+    },
+
+    _typeChanged: function() {
+      // Invalidate current chart object.
+      this._chartObject = null;
+      this._loadData();
+    },
+
+    _selectionChanged: function() {
+      if (this._chartObject && this.setSelection) {
+        this._chartObject.setSelection(this.selection);
+      }
+    },
+
+    /**
+     * Draws the chart.
+     *
+     * Called automatically on first load and whenever one of the attributes
+     * changes. Can be called manually to handle e.g. page resizes.
+     *
+     * @method drawChart
+     * @return {Object} Returns null.
+     */
+    drawChart: function() {
+      if (this._canDraw) {
+        if (!this.options) {
+          this.options = {};
+        }
+        if (!this._chartObject) {
+          var chartClass = this._chartTypes[this.type];
+          if (chartClass) {
+            this._chartObject = new chartClass(this.$.chartdiv);
+          }
+        }
+        if (this._chartObject) {
+          google.visualization.events.addOneTimeListener(this._chartObject,
+              'ready', function() {
+                  this.fire('google-chart-render');
+              }.bind(this));
+
+          google.visualization.events.addListener(this._chartObject,
+              'select', function() {
+                  this.selection = this._chartObject.getSelection();
+                  this.fire('google-chart-select',
+                      { selection: this._chartObject.getSelection() });
+              }.bind(this));
+
+
+          this._chartObject.draw(this._dataTable, this.options);
+
+          if (this._chartObject.setSelection){
+            this._chartObject.setSelection(this.selection);
+          }
+        } else {
+          this.$.chartdiv.innerHTML = 'Undefined chart type';
+        }
+      }
+      return null;
+    },
+
+    _loadChartTypes: function() {
+      this._chartTypes = {
+        'area': google.visualization.AreaChart,
+        'bar': google.visualization.BarChart,
+        'bubble': google.visualization.BubbleChart,
+        'candlestick': google.visualization.CandlestickChart,
+        'column': google.visualization.ColumnChart,
+        'combo': google.visualization.ComboChart,
+        'geo': google.visualization.GeoChart,
+        'histogram': google.visualization.Histogram,
+        'line': google.visualization.LineChart,
+        'pie': google.visualization.PieChart,
+        'scatter': google.visualization.ScatterChart,
+        'stepped-area': google.visualization.SteppedAreaChart,
+        'table': google.visualization.Table,
+        'gauge': google.visualization.Gauge,
+        'treemap': google.visualization.TreeMap
+      };
+    },
+
+    _loadPackageByChartType: function() {
+      this._packages = {
+        'area': 'corechart',
+        'bar': 'corechart',
+        'bubble': 'corechart',
+        'candlestick': 'corechart',
+        'column': 'corechart',
+        'combo': 'corechart',
+        'geo': 'corechart',
+        'histogram': 'corechart',
+        'line': 'corechart',
+        'pie': 'corechart',
+        'scatter': 'corechart',
+        'stepped-area': 'corechart',
+        'table': 'table',
+        'gauge': 'gauge',
+        'treemap': 'treemap'
+      };
+    },
+
+    _loadData: function() {
+      this._canDraw = false;
+      if (this._isReady) {
+        if (typeof this.data == 'string' || this.data instanceof String) {
+          // Load data asynchronously, from external URL.
+          this.$.ajax.generateRequest();
+        } else {
+          var dataTable = this._createDataTable();
+          this._canDraw = true;
+          if (dataTable) {
+            this._dataTable = dataTable;
+            this.drawChart();
+          }
+        }
+      }
+    },
+
+    _externalDataLoaded: function(e) {
+      var dataTable = this._createDataTable(e.detail.response);
+      this._canDraw = true;
+      this._dataTable = dataTable;
+      this.drawChart();
+    },
+
+    _createDataTable: function(data) {
+      var dataTable = null;
+
+      // If a data object was not passed to this function, default to the
+      // chart's data attribute. Passing a data object is necessary for
+      // cases when the data attribute is a URL pointing to an external
+      // data source.
+      if (!data) {
+        data = this.data;
+      }
+      if (!data)
+        data = [];
+
+      if (this.rows && this.rows.length > 0 && this.cols &&
+          this.cols.length > 0) {
+        // Create the data table from cols and rows.
+        dataTable = new google.visualization.DataTable();
+        dataTable.cols = this.cols;
+
+        for (var i = 0; i < this.cols.length; i++) {
+          dataTable.addColumn(this.cols[i]);
+        }
+
+        dataTable.addRows(this.rows);
+      } else {
+        // Create dataTable from the passed data or the data attribute.
+        // Data can be in the form of raw DataTable data or a two
+        // dimensional array.
+        if (data.rows && data.cols) {
+          dataTable = new google.visualization.DataTable(data);
+        } else if (data.length > 0) {
+          dataTable = google.visualization.arrayToDataTable(data);
+        }
+      }
+
+      return dataTable;
+    }
+  });
+})();
+</script>
+<dom-module is="google-analytics-chart">
+
+  <style>
+    :host {
+      display: -webkit-flex;
+      display: -ms-flexbox;
+      display: flex;
+      -webkit-flex-direction: column;
+      -ms-flex-direction: column;
+      flex-direction: column;
+      width: 400px;
+      height: 300px;
+    }
+    :host > * {
+      -webkit-flex: 0 0 auto;
+      -ms-flex: 0 0 auto;
+      flex: 0 0 auto;
+    }
+    :host > google-chart {
+      -webkit-flex: 1 0 0%;
+      -ms-flex: 1 0 0%;
+      flex: 1 0 0%;
+      width: auto;
+    }
+  </style>
+
+  <template>
+    <google-analytics-loader all-ready="{{setupReady}}"></google-analytics-loader>
+    <google-analytics-query id="query" loading="{{loading}}" get-data-response-handler="{{_boundResponseHandler}}" data="{{data}}" ids="{{ids}}" start-date="{{startDate}}" end-date="{{endDate}}" metrics="{{metrics}}" dimensions="{{dimensions}}" sort="{{sort}}" filters="{{filters}}" segment="{{segment}}" sampling-level="{{samplingLevel}}" start-index="{{startIndex}}" max-results="{{maxResults}}" output="dataTable" src-param="gwc-ga-chart"></google-analytics-query>
+    <content select="header,h1,h2,h3,h4,h5,h6"></content>
+    <google-chart id="chart" type="{{type}}" data="{{data.dataTable}}">
+    </google-chart>
+    <content select="footer"></content>
+  </template>
+
+</dom-module>
+
+<script>
+
+  (function() {
+
+    'use strict';
+
+    Polymer({
+
+      is: 'google-analytics-chart',
+
+      properties: {
+
+        /**
+         * Sets the type of the chart.
+         *
+         * Should be one of:
+         * - `area`, `bar`, `column`, `line`, `pie`, `geo`.
+         *
+         * @attribute type
+         * @default 'area'
+         * @type string
+         */
+        type: {
+          type: String,
+          value: 'area'
+        },
+
+        /**
+         * Sets the options for the chart.
+         *
+         * Example:
+         * <pre>{
+         *   title: "Chart title goes here",
+         *   hAxis: {title: "Categories"},
+         *   vAxis: {title: "Values", minValue: 0, maxValue: 2},
+         *   legend: "none"
+         * };</pre>
+         * See <a href="https://google-developers.appspot.com/chart/interactive/docs/gallery">Google Visualization API reference (Chart Gallery)</a>
+         * for the options available to each chart type.
+         *
+         * @attribute options
+         * @default null
+         * @type object
+         */
+        options: {
+          type: Object,
+          value: function() { return null; }
+        },
+
+        /**
+         * True after the chart has been rendered for the first time.
+         *
+         * @attribute rendered
+         * @type boolean
+         */
+        rendered: {
+          type: Boolean,
+          value: false,
+          notify: true,
+          reflectToAttribute: true
+        },
+
+        /**
+         * True if the chart is currently loading data.
+         *
+         * @attribute loading
+         * @type boolean
+         */
+        loading: {
+          type: Boolean,
+          value: false,
+          notify: true,
+          reflectToAttribute: true
+        },
+
+        /**
+         * True if setup is ready
+         *
+         * @attribute setupReady
+         * @type Boolean
+         */
+        setupReady: {
+          type: Boolean,
+          observer: 'setupReadyChanged'
+        },
+
+        /**
+         * google-analytics-query passthrough properties
+         * See google-analytics-query for documentation
+         * startDate, endDate, data, ids, metrics, dimensions, sort, filters, segment, samplingLevel, startIndex, maxResults
+         */
+        startDate: {
+          type: String,
+        },
+
+        endDate: {
+          type: String
+        },
+
+        data: {
+          type: Object
+        },
+
+        ids: {
+          type: String
+        },
+
+        metrics: {
+          type: String
+        },
+
+        dimensions: {
+          type: String
+        },
+
+        sort: {
+          type: String
+        },
+
+        filters: {
+          type: String
+        },
+
+        segment: {
+          type: String
+        },
+
+        samplingLevel: {
+          type: String
+        },
+
+        startIndex: {
+          type: Number
+        },
+
+        maxResults: {
+          type: Number
+        }
+
+      },
+
+      ready: function() {
+        this._boundResponseHandler = this.handleResponse.bind(this);
+        merge(this.$.chart.options, getChartOptions(this.type), this.options);
+      },
+
+      setupReadyChanged: function(newVal, oldVal) {
+        if (newVal) {
+          metadata.get();
+        }
+      },
+
+      handleResponse: function(response) {
+        this.rendered = true;
+
+        metadata.get().then(function(map) {
+          switchApiNamesToDisplayNames(response.dataTable, map);
+          ensureProperDataTableTypes(response.dataTable);
+          this.$.query.setData(response);
+        }.bind(this));
+      }
+    });
+
+    /**
+     * @module metadata
+     */
+    var metadata = (function() {
+      var promise;
+      function queryMetadataAPI() {
+        if (!gapi || !gapi.client || !gapi.client.analytics) {
+          console.warn("Library not loaded yet!");
+          return;
+        }
+        return new Promise(function(resolve, reject) {
+          gapi.client.analytics
+          gapi.client.analytics.metadata.columns
+              .list({
+                reportType: 'ga',
+                _src: 'gwc-ga-chart'
+              })
+              .execute(function(response) {
+                if (response.error) {
+                  reject(response.error);
+                }
+                else {
+                  var map = {};
+                  response.items.forEach(function(item) {
+                    map[item.id] = item.attributes.uiName;
+                  });
+                  resolve(map);
+                }
+              });
+        });
+      }
+      return {
+        /**
+         * Return the `queryMetadataAPI` promise. If the promise exists,
+         * return it to avoid multiple requests. If the promise does not
+         * exist, initiate the request and cache the promise.
+         */
+        get: function() {
+          promise = promise || queryMetadataAPI();
+          return promise.catch(function(err) {
+            console.error(err.stack || err);
+          });
+        }
+      };
+    }());
+
+    /**
+     * Return an options object for the specified chart type.
+     * These are options suitable to pass to a Google Chart instance.
+     * @return {Object} The chart options.
+     */
+    function getChartOptions(type) {
+      var chartOptions = {
+        base: {
+          fontSize: 11,
+          chartArea: {
+            width: '100%'
+          },
+          legend: {
+            position: 'top',
+            alignment: 'start'
+          }
+        },
+        area: {
+          pointSize: 6,
+          lineWidth: 4,
+          areaOpacity: 0.1,
+          colors: ['#058dc7', '#aadff3'],
+          hAxis: {
+            format: 'MMM d',
+            gridlines: {
+              color: 'transparent'
+            },
+            baselineColor: 'transparent'
+          },
+          vAxis: {
+            gridlines: {
+              color: '#e8e8e8',
+              logScale: true,
+              count: 3
+            },
+            textPosition: 'in'
+          }
+        },
+        bar: {
+          colors: ['#058dc7', '#50b432', '#ed561b'],
+          hAxis: {
+            gridlines: {
+              color: '#e8e8e8'
+            }
+          },
+          vAxis: {
+            textPosition: 'in',
+            textStyle: {
+              strokeWidth: 4,
+            }
+          }
+        },
+        column: {
+          colors: ['#058dc7', '#50b432', '#ed561b'],
+          hAxis: {
+            gridlines: {
+              color: 'transparent'
+            },
+            baselineColor: 'transparent'
+          },
+          vAxis: {
+            gridlines: {
+              color: '#e8e8e8',
+            },
+            textPosition: 'in'
+          },
+
+        },
+        geo: {
+          colorAxis: {
+            minValue: 0,
+            colors: ['#aadff3', '#058dc7']
+          }
+        },
+        pie: {
+          legend: {
+            position: 'right'
+          },
+          pieHole: 0.4
+        }
+      };
+      return merge({}, chartOptions.base, chartOptions[type]);
+    }
+
+    /**
+     * Use data from the Metadata API to change api names
+     * (e.g. `ga:sessions`) to their display names (e.g. "Sessions").
+     * @param {Object} dataTable - The dataTable data.
+     * @param {Object} map - A key/value store where the keys are the
+     *   api names and the values are the display names.
+     */
+    function switchApiNamesToDisplayNames(dataTable, map) {
+      dataTable.cols.forEach(function(col) {
+        col.label = map[col.id] || col.label;
+      });
+    }
+
+    /**
+     * The analytics api erroneously return some values as strings that are
+     * supposed to be numbers. This function fixes that.
+     * @param {Object} dataTable - The dataTable data.
+     */
+    function ensureProperDataTableTypes(dataTable) {
+      for (var i = 0; i < dataTable.rows.length; i++) {
+        var row = dataTable.rows[i];
+        for (var j = 0; j < row.c.length; j++) {
+          if (dataTable.cols[j].type === 'number') {
+            row.c[j].v = Number(row.c[j].v);
+          }
+        }
+      }
+    }
+
+    /**
+     * Merge the source objects, in order, onto the destination object.
+     * Recursively merge nested, plain objects, everything else copy by
+     * reference.
+     * @param {Object} target - The object to receive the merged values.
+     * @param {...Object} source - The object(s) to provide values to the
+     *  target. Later sources override previous sources.
+     * @return {Object} The merged target object.
+     */
+    function merge(target) {
+      var sources = Array.prototype.slice.call(arguments, 1);
+      sources.forEach(function(source) {
+        // Only merge objects.
+        if (!(source && typeof sources == 'object')) return;
+
+        Object.keys(source).forEach(function(key) {
+          // If the source's key is a 'plain' object, recursively merge.
+          if (typeof source[key] == 'object' &&
+              Object.getPrototypeOf(source[key]) == Object.prototype) {
+            target[key] = target[key] == null ?
+                merge({}, source[key]) : merge(target[key], source[key]);
+          }
+          // Otherwise just copy by reference.
+          else if (typeof source[key] != 'undefined') {
+            target[key] = source[key];
+          }
+        });
+      });
+      return target;
+    }
+
+  }());
+
+</script>
+<dom-module id="google-analytics-view-selector" assetpath="../bower_components/google-analytics/">
+
+  <style>
+    :host {
+      display: inline-block;
+    }
+    .control {
+      @apply(--google-analytics-view-selector-control);
+    }
+    label {
+      @apply(--google-analytics-view-selector-label);
+    }
+    select {
+      color: inherit;
+      font: inherit;
+      margin: 0;
+      @apply(--google-analytics-view-selector-select);
+    }
+    select:focus {
+      @apply(--google-analytics-view-selector-select-focus);
+    }
+  </style>
+
+  <template>
+    <google-analytics-loader all-ready="{{setupReady}}"></google-analytics-loader>
+    <span class="control">
+      <label for="account">Account</label>
+      <select id="account" on-change="updateAccount" value="{{account.id}}">
+        <template is="dom-repeat" items="{{accounts}}">
+          <option value="{{item.id}}">{{item.name}}</option>
+        </template>
+      </select>
+    </span>
+    <span class="control">
+      <label>Property</label>
+      <select id="property" on-change="updateProperty" value="{{property.id}}">
+        <template is="dom-repeat" items="{{account.properties}}">
+          <option value="{{item.id}}">{{item.name}}</option>
+        </template>
+      </select>
+    </span>
+    <span class="control">
+      <label>View</label>
+      <select id="view" on-change="updateView" value="{{view.id}}">
+        <template is="dom-repeat" items="{{property.views}}">
+          <option value="{{item.id}}">{{item.name}}</option>
+        </template>
+      </select>
+    </span>
+  </template>
+
+</dom-module>
+
+<script>
+
+  (function() {
+
+    'use strict';
+
+    Polymer({
+
+      is: 'google-analytics-view-selector',
+
+      /**
+       * Fired when the users changes the view
+       *
+       * @param {Object} query The updated query params.
+       * @event analytics-dashboard-control-change
+       */
+
+      properties: {
+
+        /**
+         * The `ids` attribute, when found is used to preselect the chosen
+         * account, property, and view.
+         *
+         * See the <a href="https://developers.google.com/analytics/devguides/reporting/core/v3/reference#ids">Core Reporting API parameter reference</a> for more details.
+         *
+         * @property ids
+         * @type string
+         */
+        ids: {
+          type: String,
+          observer: 'idsChanged',
+          notify: true
+        },
+
+        /**
+         * The `summaries` attribute contains an account summaries utility object
+         * with various helper methods for quickly getting account data.
+         *
+         * See the <a href="https://github.com/googleanalytics/javascript-api-utils">Github repo</a> for more details.
+         *
+         * @property summaries
+         * @type Object
+         */
+        summaries: {
+          type: Object,
+          value: null
+        },
+
+        /**
+         * The `account` attribute is the currently selected account.
+         *
+         * @property account
+         * @type Object
+         */
+        account: {
+          type: Object,
+          observer: 'accountChanged'
+        },
+
+        /**
+         * The `property` attribute is the currently selected property.
+         *
+         * @property property
+         * @type Object
+         */
+        property: {
+          type: Object,
+          observer: 'propertyChanged'
+        },
+
+        /**
+         * The `view` attribute is the currently selected view.
+         *
+         * @property view
+         * @type Object
+         */
+        view: {
+          type: Object,
+          observer: 'viewChanged'
+        },
+
+         /**
+         * True if setup is ready
+         *
+         * @attribute setupReady
+         * @type Boolean
+         */
+        setupReady: {
+          type: Boolean,
+          observer: 'setupReadyChanged'
+        }
+
+      },
+
+      setupReadyChanged: function(newVal, oldVal) {
+        if (newVal) {
+          gaApiUtils.accountSummaries.get().then(function(accountSummaries) {
+            this.summaries = accountSummaries;
+            this.accounts = accountSummaries.all();
+
+            if (this.ids) {
+              // Manually call `idsChanged` here. The first change event will
+              // likely happen prior to fetching the accountSummaries data.
+              this.idsChanged(null, this.ids);
+            } else {
+              // When there's no `ids` set, just select the first account,
+              // which will trigger change events and set the property and view.
+              this.account = this.accounts[0];
+            }
+          }.bind(this));
+        }
+        else {
+          this.summaries = null;
+          this.accounts = null;
+          this.account = null;
+          this.property = null;
+          this.view = null;
+          this.ids = null;
+        }
+      },
+
+      /**
+       * The `updateAccount` method is bound to the change event on the
+       * account `<select>`. It updates the property and view `<select>`s based
+       * on the new account data. It also updates the `ids` attribute.
+       */
+      updateAccount: function() {
+        this.account = this.summaries.getAccount(this.$.account.value);
+      },
+
+      /**
+       * The `updateProperty` method is bound to the change event on the
+       * property `<select>`. It updates the view `<select>` based
+       * on the new property data. It also updates the `ids` attribute.
+       */
+      updateProperty: function() {
+        this.property = this.summaries.getProperty(this.$.property.value);
+      },
+
+      /**
+       * The `updateView` method is bound to the change event on the
+       * view `<select>`. It updates the `ids` attribute.
+       */
+      updateView: function() {
+        this.view = this.summaries.getView(this.$.view.value);
+      },
+
+      accountChanged: function(newAccount, oldAccount) {
+        if (newAccount) {
+          this.property = newAccount.properties[0];
+        }
+      },
+
+      propertyChanged: function(newProperty, oldProperty) {
+        if (newProperty) {
+          this.view = newProperty.views[0];
+          // this.view = Path.get('views[0]').getValueFrom(newProperty);
+        }
+      },
+
+      viewChanged: function(newView, oldView) {
+        this.ids = newView && 'ga:' + newView.id;
+      },
+
+      idsChanged: function(newIds, oldIds) {
+        // When `ids` is set or updated prior to fetching the account
+        // summaries, do nothing.
+        if (!this.summaries) return;
+
+        var viewId = newIds && newIds.slice(3);
+        var account = this.summaries.getAccountByViewId(viewId);
+        var property = this.summaries.getPropertyByViewId(viewId);
+        var view = this.summaries.getView(viewId);
+
+        // Make sure the account data is valid before firing any events.
+        if (account && property && view) {
+          this.account = account;
+          this.property = property;
+          this.view = view;
+
+          this.fireChangeEvent();
+        }
+        // If the account data isn't valid, and there's no previous value
+        // to fall back to, default to the first account.
+        else if (!oldIds) {
+          this.account = this.summaries.all()[0];
+        }
+      },
+
+      /**
+       * Fire a change event passing all the currently stored data.
+       */
+      fireChangeEvent: function() {
+        this.fire('analytics-dashboard-control-change', {
+          ids: this.ids,
+          account: this.account,
+          property: this.property,
+          view: this.view
+        });
+      }
+
+    });
+
+  }());
+
+</script>
+<dom-module id="google-analytics-date-selector" assetpath="../bower_components/google-analytics/">
+
+  <style>
+    :host {
+      display: inline-block;
+    }
+    .control {
+      @apply(--google-analytics-date-selector-control);
+    }
+    label {
+      @apply(--google-analytics-date-selector-label);
+    }
+    input {
+      color: inherit;
+      font: inherit;
+      margin: 0;
+      @apply(--google-analytics-date-selector-input);
+    }
+    input:focus {
+      @apply(--google-analytics-date-selector-input-focus);
+    }
+  </style>
+
+  <template>
+    <span class="control">
+      <label for="startDate">Start Date</label>
+      <input id="startDate" type="date" value="{{startDate::change}}" min="{{minStartDate}}" max="{{endDate}}">
+    </span>
+    <span class="control">
+      <label for="endDate">End Date</label>
+      <input id="endDate" type="date" value="{{endDate::change}}" min="{{startDate}}" max="{{maxEndDate}}">
+    </span>
+  </template>
+
+</dom-module>
+
+<script>
+
+  (function() {
+
+    'use strict';
+
+    /**
+     * Fired when the users changes the start or end date.
+     *
+     * @param {Object} query The updated query params.
+     * @event analytics-dashboard-control-change
+     */
+
+
+    var nDaysAgo = /(\d+)daysAgo/;
+    var dateFormat = /\d{4}\-\d{2}\-\d{2}/;
+
+    /**
+     * Convert a date acceptable to the Core Reporting API (e.g. `today`,
+     * `yesterday` or `NdaysAgo`) into the format YYYY-MM-DD. Dates
+     * already in that format are simply returned.
+     * @return {string} The formatted date.
+     */
+    function convertDate(str) {
+      // If str is in the proper format, do nothing.
+      if (dateFormat.test(str)) return str
+
+      var match = nDaysAgo.exec(str);
+      if (match) {
+        return daysAgo(+match[1])
+      } else if (str == 'today') {
+        return daysAgo(0)
+      } else if (str == 'yesterday') {
+        return daysAgo(1)
+      } else {
+        throw new Error('Cannot convert date ' + str);
+      }
+    }
+
+    /**
+     * Accept a number and return a date formatted as YYYY-MM-DD that
+     * represents that many days ago.
+     * @return {string} The formatted date.
+     */
+    function daysAgo(numDays) {
+      var date = new Date();
+      date.setDate(date.getDate() - numDays);
+      var month = String(date.getMonth() + 1);
+      month = month.length == 1 ? '0' + month: month;
+      var day = String(date.getDate());
+      day = day.length == 1 ? '0' + day: day;
+      return date.getFullYear() + '-' + month + '-' + day;
+    }
+
+    Polymer({
+
+      is: 'google-analytics-date-selector',
+
+      properties: {
+        /**
+         * The `startDate` attribute is the start date for fetching Analytics
+         * data. Requests can specify a start date formatted as YYYY-MM-DD, or
+         * as a relative date (e.g., today, yesterday, or NdaysAgo where N is a
+         * positive integer).
+         *
+         * See the <a href="https://developers.google.com/analytics/devguides/reporting/core/v3/reference#startDate">Core Reporting API parameter reference</a> for more details.
+         *
+         * @attribute startDate
+         * @default '7daysAgo'
+         * @type string
+         */
+        startDate: {
+          type: String,
+          value: convertDate('7daysAgo'),
+          observer: 'startDateChanged',
+          notify: true
+        },
+
+        /**
+         * The `endDate` attribute is the end date for fetching Analytics
+         * data. Requests can specify an end date formatted as YYYY-MM-DD, or
+         * as a relative date (e.g., today, yesterday, or NdaysAgo where N is a
+         * positive integer).
+         *
+         * See the <a href="https://developers.google.com/analytics/devguides/reporting/core/v3/reference#endDate">Core Reporting API parameter reference</a> for more details.
+         *
+         * @attribute endDate
+         * @default 'yesterday'
+         * @type string
+         */
+        endDate: {
+          type: String,
+          value: convertDate('yesterday'),
+          observer: 'endDateChanged',
+          notify: true
+        },
+
+        /**
+         * The `minStartDate` attribute is used as the `min` attribute on the
+         * start date `<input>`.
+         *
+         * @attribute minStartDate
+         * @default '2005-01-01'
+         * @type string
+         */
+        minStartDate: {
+          type: String,
+          value: '2005-01-01'
+        },
+
+        /**
+         * The `maxEndDate` attribute is used as the `max` attribute on the
+         * end date `<input>`.
+         *
+         * @attribute maxEndDate
+         * @default 'today'
+         * @type string
+         */
+        maxEndDate: {
+          type: String,
+          value: convertDate('today')
+        }
+      },
+
+      startDateChanged: function(cur, old) {
+        this.startDate = convertDate(cur);
+        this.$.startDate.value = this.startDate;
+        this.fire('analytics-dashboard-control-change', {
+          startDate: this.startDate
+        });
+      },
+
+      endDateChanged: function(cur, old) {
+        this.endDate = convertDate(cur);
+        this.$.endDate.value = this.endDate;
+        this.fire('analytics-dashboard-control-change', {
+          endDate: this.endDate
+        });
+      }
+    });
+
+  }());
+
+</script>
+<dom-module id="google-analytics-dashboard" assetpath="../bower_components/google-analytics/">
+
+  <template>
+    <google-signin-aware on-google-signin-aware-success="_signedIn" on-google-signin-aware-signed-out="_signedOut"></google-signin-aware>
+    <content id="content"></content>
+  </template>
+
+</dom-module>
+
+<script>
+
+  (function() {
+
+    'use strict';
+
+    Polymer({
+
+      is: 'google-analytics-dashboard',
+
+      properties: {
+        /**
+         * The `query` attribute represents the internal query object of this
+         * dashboard. It is updated when control elements fire the
+         * `analytics-dashboard-control-change` event and pass along query data.
+         */
+        query: {
+          type: Object,
+          value: function() { return {}; }
+        },
+
+        /**
+         * True if user has been authorized
+         */
+        authorized: {
+          type: Boolean,
+          value: false,
+          reflectToAttribute: true
+        }
+
+      },
+
+      listeners: {
+        'analytics-dashboard-control-change': 'queryUpdated'
+      },
+
+      ready: function() {
+       this.updateChildren();
+      },
+
+      /**
+       * The `queryUpdated` method is the callback for whenever the
+       * `analytics-dashboard-control-change` event is fired. It updates the
+       * query attribute, which is then sent to child charts.
+       *
+       * @method queryUpdated
+       * @param {CustomEvent} event - The event with the query data.
+       */
+      queryUpdated: function(event) {
+        // Update `this.query` with the passed event data.
+        Object.keys(event.detail).forEach(function(key) {
+          this.query[key] = event.detail[key];
+        }.bind(this))
+
+        this.updateChildren();
+      },
+
+      /**
+       * The `updateChildren` method updates each of this dashboards
+       * `<google-analytics-chart>` element with its current query value.
+       *
+       * @method updateChildren
+       */
+      updateChildren: function() {
+        if (!this.authorized) {
+          return;
+        }
+        var charts = Polymer.dom(this).querySelectorAll('google-analytics-chart');
+        for (var i = 0, chart; chart = charts[i]; i++) {
+          Object.keys(this.query).forEach(function(key) {
+            chart[key] = this.query[key];
+          }.bind(this));
+        }
+      },
+
+      _signedIn: function() {
+        this.authorized = true;
+        this.updateChildren();
+      },
+
+      _signedOut: function() {
+        this.authorized = false;
+      }
+
+    });
+
+  }());
+
+</script>
+<dom-module id="marked-element" assetpath="../bower_components/marked-element/">
+  <template>
+    <style>
+      /* Thanks IE 10. */
+      .hidden {
+        display: none !important;
+      }
+    </style>
+    <content select=".markdown-html"></content>
+    <div id="content" class="hidden"></div>
   </template>
 
 </dom-module>
@@ -29438,11 +32733,22 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
      */
     attached: function() {
       this._attached = true;
+      this._outputElement = this.outputElement;
       this.render();
     },
 
     detached: function() {
       this._attached = false;
+    },
+
+    get outputElement () {
+      var child = Polymer.dom(this).queryDistributedElements('.markdown-html')[0];
+
+      if (child)
+        return child;
+
+      this.toggleClass('hidden', false, this.$.content);
+      return this.$.content;
     },
 
     /**
@@ -29457,11 +32763,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     render: function() {
       if (!this._attached) return;
       if (!this.markdown) {
-        this.$.content.innerHTML = '';
+        Polymer.dom(this._outputElement).innerHTML = '';
         return;
       }
 
-      this.$.content.innerHTML = marked(this.markdown, {
+      Polymer.dom(this._outputElement).innerHTML = marked(this.markdown, {
         highlight: this._highlight.bind(this),
       });
     },
@@ -29725,173 +33031,234 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 --angularjs: #E0343D;
                 --polymer: #D81B60;
                 --dart: #00B4AA;
+                --firebase: #FF9800;
+                --appengine: #0D47A1;
+                --serviceworkers: #311B92;
+                --web-rtc: #7B1FA2;
                 --kubernetes: #326DE6;
-                --v8-engine: #009688;
+                --v8-engine: #006064;
                 --gae: #FFC107;
                 --ndk: #4CAF50;
+                --ble: #1565C0;
                 --ci: #CDDC39;
-                --grpc: #617D8A;
+                --tv: #D32F2F;
+                --grpc: #607D8B;
                 --ux: #9C27B0;
                 --material-design: #009688;
+                --entrepreneurship: #673AB7;
             }
-
+            .default {
+                background: var(--disabled-text-color);
+                color: var(--disabled-text-color);
+                border-color: var(--disabled-text-color);
+            }
+            .android {
+                background: var(--android);
+                color: var(--android);
+                border-color: var(--android);
+            }
+            .web {
+                background: var(--web);
+                color: var(--web);
+                border-color: var(--web);
+            }
+            .cloud {
+                background: var(--cloud);
+                color: var(--cloud);
+                border-color: var(--cloud);
+            }
+            .community {
+                background: var(--community);
+                color: var(--community);
+                border-color: var(--community);
+            }
+            .entrepreneurship {
+                background: var(--entrepreneurship);
+                color: var(--entrepreneurship);
+                border-color: var(--entrepreneurship);
+            }
             paper-checkbox.android {
                 --paper-checkbox-checked-color: var(--android);
                 --paper-checkbox-checked-ink-color: var(--android);
                 --paper-checkbox-unchecked-ink-color: var(--android);
             }
-
             paper-checkbox.web {
                 --paper-checkbox-checked-color: var(--web);
                 --paper-checkbox-checked-ink-color: var(--web);
                 --paper-checkbox-unchecked-ink-color: var(--web);
             }
-
             paper-checkbox.cloud {
                 --paper-checkbox-checked-color: var(--cloud);
                 --paper-checkbox-checked-ink-color: var(--cloud);
                 --paper-checkbox-unchecked-ink-color: var(--cloud);
             }
-
             paper-checkbox.community {
                 --paper-checkbox-checked-color: var(--community);
                 --paper-checkbox-checked-ink-color: var(--community);
                 --paper-checkbox-unchecked-ink-color: var(--community);
             }
-
             paper-checkbox.angularjs {
                 --paper-checkbox-checked-color: var(--angularjs);
                 --paper-checkbox-checked-ink-color: var(--angularjs);
                 --paper-checkbox-unchecked-ink-color: var(--angularjs);
             }
-
             paper-checkbox.polymer {
                 --paper-checkbox-checked-color: var(--polymer);
                 --paper-checkbox-checked-ink-color: var(--polymer);
                 --paper-checkbox-unchecked-ink-color: var(--polymer);
             }
-
             paper-checkbox.dart {
                 --paper-checkbox-checked-color: var(--dart);
                 --paper-checkbox-checked-ink-color: var(--dart);
                 --paper-checkbox-unchecked-ink-color: var(--dart);
             }
-
+            paper-checkbox.firebase {
+                --paper-checkbox-checked-color: var(--firebase);
+                --paper-checkbox-checked-ink-color: var(--firebase);
+                --paper-checkbox-unchecked-ink-color: var(--firebase);
+            }
+            paper-checkbox.appengine {
+                --paper-checkbox-checked-color: var(--appengine);
+                --paper-checkbox-checked-ink-color: var(--appengine);
+                --paper-checkbox-unchecked-ink-color: var(--appengine);
+            }
+            paper-checkbox.serviceworkers {
+                --paper-checkbox-checked-color: var(--serviceworkers);
+                --paper-checkbox-checked-ink-color: var(--serviceworkers);
+                --paper-checkbox-unchecked-ink-color: var(--serviceworkers);
+            }
+            paper-checkbox.web-rtc {
+                --paper-checkbox-checked-color: var(--web-rtc);
+                --paper-checkbox-checked-ink-color: var(--web-rtc);
+                --paper-checkbox-unchecked-ink-color: var(--web-rtc);
+            }
             paper-checkbox.kubernetes {
                 --paper-checkbox-checked-color: var(--kubernetes);
                 --paper-checkbox-checked-ink-color: var(--kubernetes);
                 --paper-checkbox-unchecked-ink-color: var(--kubernetes);
             }
-
             paper-checkbox.v8-engine {
                 --paper-checkbox-checked-color: var(--v8-engine);
                 --paper-checkbox-checked-ink-color: var(--v8-engine);
                 --paper-checkbox-unchecked-ink-color: var(--v8-engine);
             }
-
             paper-checkbox.gae {
                 --paper-checkbox-checked-color: var(--gae);
                 --paper-checkbox-checked-ink-color: var(--gae);
                 --paper-checkbox-unchecked-ink-color: var(--gae);
             }
-
             paper-checkbox.ndk {
                 --paper-checkbox-checked-color: var(--ndk);
                 --paper-checkbox-checked-ink-color: var(--ndk);
                 --paper-checkbox-unchecked-ink-color: var(--ndk);
             }
-
+            paper-checkbox.ble {
+                --paper-checkbox-checked-color: var(--ble);
+                --paper-checkbox-checked-ink-color: var(--ble);
+                --paper-checkbox-unchecked-ink-color: var(--ble);
+            }
             paper-checkbox.ci {
                 --paper-checkbox-checked-color: var(--ci);
                 --paper-checkbox-checked-ink-color: var(--ci);
                 --paper-checkbox-unchecked-ink-color: var(--ci);
             }
-
+            paper-checkbox.tv {
+                --paper-checkbox-checked-color: var(--tv);
+                --paper-checkbox-checked-ink-color: var(--tv);
+                --paper-checkbox-unchecked-ink-color: var(--tv);
+            }
             paper-checkbox.grpc {
                 --paper-checkbox-checked-color: var(--grpc);
                 --paper-checkbox-checked-ink-color: var(--grpc);
                 --paper-checkbox-unchecked-ink-color: var(--grpc);
             }
-
             paper-checkbox.ux {
                 --paper-checkbox-checked-color: var(--ux);
                 --paper-checkbox-checked-ink-color: var(--ux);
                 --paper-checkbox-unchecked-ink-color: var(--ux);
             }
-
             paper-checkbox.material-design {
                 --paper-checkbox-checked-color: var(--material-design);
                 --paper-checkbox-checked-ink-color: var(--material-design);
                 --paper-checkbox-unchecked-ink-color: var(--material-design);
             }
-
+            paper-checkbox.entrepreneurship {
+                --paper-checkbox-checked-color: var(--entrepreneurship);
+                --paper-checkbox-checked-ink-color: var(--entrepreneurship);
+                --paper-checkbox-unchecked-ink-color: var(--entrepreneurship);
+            }
             .tag-label {
                 padding: 4px 6px;
                 color: #fff;
                 font-size: 11px;
                 background: var(--default-primary-color);
             }
-
             .tag-label.android {
                 background: var(--android);
             }
-
             .tag-label.web {
                 background: var(--web);
             }
-
             .tag-label.cloud {
                 background: var(--cloud);
             }
-
             .tag-label.community {
                 background: var(--community);
             }
-
             .tag-label.angularjs {
                 background: var(--angularjs);
             }
-
             .tag-label.polymer {
                 background: var(--polymer);
             }
-
             .tag-label.dart {
                 background: var(--dart);
             }
-
+            .tag-label.firebase {
+                background: var(--firebase);
+            }
+            .tag-label.appengine {
+                background: var(--appengine);
+            }
+            .tag-label.serviceworkers {
+                background: var(--serviceworkers);
+            }
+            .tag-label.web-rtc {
+                background: var(--web-rtc);
+            }
             .tag-label.kubernetes {
                 background: var(--kubernetes);
             }
-
             .tag-label.v8-engine {
                 background: var(--v8-engine);
             }
-
             .tag-label.gae {
                 background: var(--gae);
             }
-
             .tag-label.ndk {
                 background: var(--ndk);
             }
-
+            .tag-label.ble {
+                background: var(--ble);
+            }
             .tag-label.ci {
                 background: var(--ci);
             }
-
+            .tag-label.tv {
+                background: var(--tv);
+            }
             .tag-label.grpc {
                 background: var(--grpc);
             }
-
             .tag-label.ux {
                 background: var(--ux);
             }
-
             .tag-label.material-design {
                 background: var(--material-design);
             }
-
+            .tag-label.entrepreneurship {
+                background: var(--entrepreneurship);
+            }
             paper-scroll-header-panel.android {
                 --paper-scroll-header-panel-full-header: {
                     background-color: var(--android);
@@ -29902,7 +33269,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 }
                 ;
             }
-
             paper-scroll-header-panel.web {
                 --paper-scroll-header-panel-full-header: {
                     background-color: var(--web);
@@ -29913,7 +33279,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 }
                 ;
             }
-
             paper-scroll-header-panel.cloud {
                 --paper-scroll-header-panel-full-header: {
                     background-color: var(--cloud);
@@ -29924,7 +33289,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 }
                 ;
             }
-
             paper-scroll-header-panel.community {
                 --paper-scroll-header-panel-full-header: {
                     background-color: var(--community);
@@ -29935,7 +33299,119 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 }
                 ;
             }
-        </style></template></dom-module><dom-module id="hero-block" assetpath="hero-block/">
+        </style></template></dom-module><dom-module id="app-data" assetpath="app-data/">
+    <template>
+        <iron-ajax auto="" url="[[speakersSource]]" handle-as="json" last-response="{{speakers}}"></iron-ajax>
+        <iron-ajax auto="" url="[[sessionsSource]]" handle-as="json" last-response="{{sessions}}"></iron-ajax>
+        <iron-ajax auto="" url="[[postsSource]]" handle-as="json" last-response="{{posts}}"></iron-ajax>
+        <iron-ajax auto="" url="[[partnersSource]]" handle-as="json" last-response="{{partners}}"></iron-ajax>
+        <iron-ajax auto="" url="[[scheduleSource]]" handle-as="json" last-response="{{_scheduleRaw}}"></iron-ajax>
+    </template>
+</dom-module>
+
+<script>
+    Polymer({
+        is: 'app-data',
+        properties: {
+            speakersSource: {
+                type: String,
+                value: '../../data/speakers.json'
+            },
+            sessionsSource: {
+                type: String,
+                value: '../../data/sessions.json'
+            },
+            postsSource: {
+                type: String,
+                value: '../../data/blog.json'
+            },
+            partnersSource: {
+                type: String,
+                value: '../../data/partners.json'
+            },
+            scheduleSource: {
+                type: String,
+                value: '../../data/schedule.json'
+            },
+            speakers: {
+                type: Array,
+                notify: true
+            },
+            sessions: {
+                type: Array,
+                notify: true
+            },
+            posts: {
+                type: Array,
+                notify: true
+            },
+            partners: {
+                type: Array,
+                notify: true
+            },
+            _scheduleRaw: {
+                type: Array
+            },
+            schedule: {
+                type: Array,
+                notify: true
+            }
+        },
+        observers: [
+            '_generateSchedule(speakers, sessions, _scheduleRaw)'
+        ],
+        _generateSchedule: function() {
+            for (var i = 0, scheduleLen = this._scheduleRaw.length; i < scheduleLen; i++) {
+                var day = this._scheduleRaw[i];
+                for (var j = 0, timeslotsLen = day.timeslots.length; j < timeslotsLen; j++) {
+                    var timeslot = day.timeslots[j];
+                    for (var k = 0, sessionsLen = timeslot.sessions.length; k < sessionsLen; k++) {
+                        for (var l = 0, subSessionsLen = timeslot.sessions[k].length; l < subSessionsLen; l++) {
+                            var session = this._getSession(timeslot.sessions[k][l]);
+                            if(!session.track) {
+                                session.track = day.tracks[k];
+                            }
+                            session.startTime = timeslot.startTime;
+                            session.endTime = subSessionsLen > 1 ? this._getEndTime(day.date, timeslot.startTime, timeslot.endTime, subSessionsLen, l + 1) : timeslot.endTime;
+                            this._scheduleRaw[i].timeslots[j].sessions[k][l] = session;
+                        }
+                    }
+                }
+            }
+            this.schedule = this._scheduleRaw;
+        },
+        _getSession: function(sessionId) {
+            for (var i = 0, sessionsLen = this.sessions.length; i < sessionsLen; i++) {
+                if (sessionId === this.sessions[i].id) {
+                    this.sessions[i].mainTag = this.sessions[i].tags ? app.generateClass(this.sessions[i].tags[0]) : 'default';
+                    if (this.sessions[i].speakers) {
+                        for (var j = 0, speakersLen = this.sessions[i].speakers.length; j < speakersLen; j++) {
+                            if (!this.sessions[i].speakers[j].id) {
+                                this.sessions[i].speakers[j] = this._getSpeaker(this.sessions[i].speakers[j]);
+                            }
+                        }
+                    }
+                    return this.sessions[i];
+                }
+            }
+        },
+        _getSpeaker: function(speakerId) {
+            for (var i = 0, speakersLen = this.speakers.length; i < speakersLen; i++) {
+                if (speakerId === this.speakers[i].id) {
+                    return this.speakers[i];
+                }
+            }
+        },
+        _getEndTime: function(date, startTime, endTime, totalNumber, number) {
+            var timezone = new Date().toString().match(/([A-Z]+[\+-][0-9]+.*)/)[1],
+                timeStart = new Date(date + ' ' + startTime + ' ' + timezone).getTime(),
+                timeEnd = new Date(date + ' ' + endTime + ' ' + timezone).getTime(),
+                difference = Math.floor((timeEnd - timeStart) / totalNumber),
+                result = new Date(timeStart + difference * number);
+            return result.getHours() + ':' + result.getMinutes();
+        }
+    });
+</script><dom-module id="hero-block" assetpath="hero-block/">
     <template>
         <style>
             :host {
@@ -29949,39 +33425,35 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 ;
                 color: #4E4E4E;
             }
-
+            paper-tab {
+                flex: none;
+                padding: 0 10px;
+            }
             .nav-link {
                 color: inherit;
             }
-
             .logo {
                 margin-top: 7px;
                 height: 40px;
             }
-
             .container {
                 padding-top: 0;
                 padding-bottom: 20px;
             }
-
             ::content .hero {
                 padding-bottom: 20px;
             }
-
             ::content .top-section {
                 padding-top: 20px;
                 font-size: 20px;
             }
-
             ::content h3 {
                 font-size: 2.1em;
             }
-
             ::content .logo {
                 height: 100px;
                 max-width: 100%;
             }
-
             ::content .slogan,
             ::content .dates {
                 margin-top: 20px;
@@ -29991,34 +33463,28 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 letter-spacing: .09em;
                 line-height: 1;
             }
-
             ::content .description {
                 margin-top: 20px;
             }
-
             ::content .links {
                 margin: 40px 0 10px;
             }
-
             ::content .event-image {
                 width: 100%;
                 height: 100%;
             }
-
             ::content .right-section {
                 margin-top: 20px;
                 height: 200px;
             }
-
-            @media (max-width: 767px) {
+            @media (max-width: 600px) {
                 ::content .center-content-xs {
                     @apply(--layout-vertical);
                     @apply(--layout-center);
                     text-align: center;
                 }
             }
-
-            @media (min-width: 768px) {
+            @media (min-width: 601px) {
                 ::content .hero {
                     padding-top: 40px;
                 }
@@ -30035,19 +33501,30 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 <paper-toolbar>
                     <paper-icon-button class="visible-xs" icon="menu" on-tap="togglePanel"></paper-icon-button>
                     <div class="flex hidden-xs">
-                        <a data-route="home" href="/" hidden="{{hideLogo}}">
-                            <img class="logo" src="../images/GDG_DevFest_Hamburg_2015_white.png" alt="GDG DevFest 2015">
+                        <a data-route="home" href="/" hidden$="{{hideLogo}}">
+                            <img class="logo" src="../images/logo-white.svg" alt="GDG DevFest 2015">
                         </a>
                     </div>
                     <paper-tabs class="hidden-xs" attr-for-selected="data-route" selected="{{route}}">
-                        <paper-tab class="text-u-c">
-                            <a data-route="blog" href="#!/blog" class="nav-link horizontal center-center layout">Blog</a>
+                        <paper-tab class="text-u-c" link="">
+                            <a data-route="blog" href="#!/blog" class="nav-link horizontal center-center layout">
+                                Blog
+                            </a>
                         </paper-tab>
-                        <paper-tab class="text-u-c">
-                            <a data-route="speakers" href="#!/speakers" class="nav-link horizontal center-center layout">Speakers</a>
+                        <paper-tab class="text-u-c" link="">
+                            <a data-route="schedule" href="#!/schedule" class="nav-link horizontal center-center layout">
+                                Schedule
+                            </a>
                         </paper-tab>
-                        <paper-tab class="text-u-c">
-                            <a data-route="team" href="#!/team" class="nav-link horizontal center-center layout">Team</a>
+                        <paper-tab class="text-u-c" link="">
+                            <a data-route="speakers" href="#!/speakers" class="nav-link horizontal center-center layout">
+                                Speakers
+                            </a>
+                        </paper-tab>
+                        <paper-tab class="text-u-c" link="">
+                            <a data-route="team" href="#!/team" class="nav-link horizontal center-center layout">
+                                Team
+                            </a>
                         </paper-tab>
                         <!-- <paper-tab class="text-u-c">
                             <a data-route="contact" href="#!/contact" class="nav-link horizontal center-center layout">Contact</a>
@@ -30074,8 +33551,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             document.querySelector('#paperDrawerPanel').togglePanel();
         }
     });
-</script>
-<dom-module id="about-conference" assetpath="about-conference/">
+</script><dom-module id="about-conference" assetpath="about-conference/">
   <style>
     :host {
       display: block;
@@ -32328,98 +35804,78 @@ Polymer({
                 }
                 ;
             }
-
             .person-wrapper {
                 display: none;
             }
-
             .bottom-image-text {
                 padding: 16px;
                 position: absolute;
                 bottom: 0;
                 color: #fff;
             }
-
             paper-material {
                 background: #fff;
             }
-
             .card-content {
                 padding: 16px;
             }
-
             .people-name {
                 font-size: 24px;
                 font-weight: 300;
             }
-
             .title {
                 margin-top: -5px;
                 font-size: 14px;
                 font-weight: 300;
             }
-
             .sessions h3:not(:last-of-type) {
                 margin-bottom: 10px;
             }
-
             .session-title {
                 font-size: 18px;
             }
-
             .card-wrapper {
                 margin-bottom: 20px;
             }
-
             .card-content {
                 padding: 16px;
             }
-
             .card-actions {
                 border-top: 1px solid #e8e8e8;
                 padding: 5px 16px;
                 position: relative;
             }
-
             .card-wrapper {
                 margin-bottom: 20px;
             }
-
             .people-header {
                 height: 256px;
             }
-
             .people-image-overlay {
                 background: linear-gradient(to top, rgba(0, 0, 0, 0.5) 4%, rgba(0, 0, 0, 0) 50%);
             }
-
             .badges {
                 margin: 0;
                 padding: 15px;
                 list-style: none;
             }
-
             .badge {
                 display: inline-block;
             }
-
             .badge:not(:last-of-type):after {
                 color: rgba(255, 255, 255, 0.8);
                 vertical-align: middle;
                 font-size: 14px;
                 content: "\2022";
             }
-
             .badge a {
                 color: #fff;
                 font-size: 14px;
                 font-weight: 500;
             }
-
             .people-description {
                 padding-bottom: 0;
             }
-
             .brief {
                 margin-bottom: 16px;
                 display: block;
@@ -32430,29 +35886,26 @@ Polymer({
                 -webkit-line-clamp: 3;
                 -webkit-box-orient: vertical;
             }
-
             .filters {
                 margin-bottom: 20px;
             }
-
+            .filters paper-checkbox {
+                background: none;
+            }
             .filters .card-content {
                 border-bottom: 1px solid #eee;
             }
-
             .filters .header {
                 font-size: 20px;
                 font-weight: 400;
             }
-
             .filters .card-actions {
                 border: 0;
             }
-
             .selector-group > * {
                 padding: 14px 16px;
             }
-
-            @media (max-width: 767px) {
+            @media (max-width: 600px) {
                 .person-wrapper,
                 .person {
                     @apply(--layout-fit);
@@ -32464,8 +35917,7 @@ Polymer({
                     text-align: right;
                 }
             }
-
-            @media (min-width: 768px) {
+            @media (min-width: 601px) {
                 .card-wrapper {
                     width: calc(100% / 3);
                 }
@@ -32477,8 +35929,6 @@ Polymer({
                 }
             }
         </style>
-        <iron-ajax auto="" url="[[source]]" handle-as="json" last-response="{{peopleTemp}}"></iron-ajax>
-        <iron-ajax auto="" url="[[sessionsSource]]" handle-as="json" last-response="{{sessions}}"></iron-ajax>
         <div id="people" class="container flex layout vertical">
             <div class="layout vertical-horizontal">
                 <div class="flex">
@@ -32556,8 +36006,8 @@ Polymer({
             Polymer.NeonAnimationRunnerBehavior
         ],
         properties: {
-            source: String,
-            sessionsSource: String,
+            sessions: Array,
+            speakers: Array,
             tags: Array,
             badges: Array,
             filters: {
@@ -32616,24 +36066,22 @@ Polymer({
             }
         },
         observers: [
-            'generatePeople(peopleTemp, sessions)'
+            'generatePeople(speakers, sessions)'
         ],
         listeners: {
             'neon-animation-finish': '_onNeonAnimationFinish'
         },
-        generatePeople: function(peopleTemp, sessions) {
-            for (var i = 0; i < peopleTemp.length; i++) {
-                peopleTemp[i].sessions = [];
+        generatePeople: function(speakers, sessions) {
+            for (var i = 0; i < speakers.length; i++) {
+                speakers[i].sessions = [];
                 for (var j = 0; j < sessions.length; j++) {
-                    if (sessions[j].speakers.indexOf(peopleTemp[i].id) > -1) {
-                        peopleTemp[i].sessions.push(sessions[j]);
+                    if (sessions[j].speakers && sessions[j].speakers.indexOf(speakers[i].id) > -1) {
+                        speakers[i].sessions.push(sessions[j]);
                     }
                 }
             }
-            this.people = peopleTemp;
-
+            this.people = speakers;
             this._generateFilters();
-
             this.async(function() {
                 var nodeList = this.$.people.querySelectorAll('.card-wrapper');
                 this.animationConfig.loadPeople.nodes = Array.prototype.slice.call(nodeList);
@@ -32681,7 +36129,6 @@ Polymer({
             }
             return filters;
         },
-
         playLoadAnimation: function() {
             this.cancelAnimation();
             this.playAnimation('loadPeople');
@@ -32696,7 +36143,7 @@ Polymer({
             this.$.personCon.style.display = 'block';
             this.cancelAnimation();
             this.playAnimation('openPerson');
-            if (screen.width > 768) {
+            if (screen.width > 601) {
                 this.playAnimation('unloadPeople');
             }
         },
@@ -32707,13 +36154,13 @@ Polymer({
             this.playAnimation('closePerson');
         },
         _onNeonAnimationFinish: function() {
-            if (this.opened && screen.width > 768) {
+            if (this.opened && screen.width > 601) {
                 this.$.people.style.display = 'none';
                 this.$.people.style.position = 'absolute';
             }
             if (!this.opened) {
                 this.$.personCon.style.display = 'none';
-                if (screen.width > 768) {
+                if (screen.width > 601) {
                     this.$.people.style.display = 'flex';
                     this.$.people.style.position = 'relative';
                 }
@@ -32773,10 +36220,8 @@ Polymer({
         checkHiding: function(person) {
             return !person.hide;
         }
-
     });
-</script>
-<dom-module id="team-block" assetpath="team-block/">
+</script><dom-module id="team-block" assetpath="team-block/">
     <template>
         <style include="tags-color"></style>
         <style>
@@ -33439,4 +36884,438 @@ Polymer({
     }
 });
 </script>
+<dom-module id="schedule-block" assetpath="schedule-block/">
+    <template>
+        <style include="tags-color"></style>
+        <style>
+            :host {
+                margin-top: 32px;
+                display: block;
+                --paper-tabs-selection-bar-color: #fff;
+                --paper-tab-ink: rgba(255, 255, 255, 0.2);
+                --paper-tab-content: {
+                    font-weight: 400 !important;
+                }
+                ;
+                --paper-tab: {
+                    color: #fff;
+                    font-weight: 400;
+                    text-transform: uppercase;
+                    flex: none;
+                }
+            }
+
+            .schedule-icon {
+                --iron-icon-height: 20px;
+                --iron-icon-width: 20px;
+            }
+
+            .track {
+                width: 40px;
+            }
+
+            .track-dot span {
+                margin: 7px 0 0 8px;
+                width: 10px;
+                height: 10px;
+                display: block;
+                border-radius: 50%;
+            }
+
+            .session {
+                background: #fff;
+            }
+
+            .sub-session {
+                padding: 10px 16px;
+                background: none !important;
+                color: inherit !important;
+                cursor: pointer;
+            }
+
+            .session:last-of-type .sub-sessio:last-of-type {
+                padding-bottom: 0;
+            }
+
+            .session-title {
+                margin-bottom: 10px;
+                font-weight: 300;
+                font-size: 20px;
+                line-height: 1.1;
+                color: var(--primary-text-color);
+            }
+
+            .start-time {
+                margin: 25px 0 10px 10px;
+                font-size: 14px;
+                font-weight: 400;
+                color: var(--secondary-text-color);
+            }
+
+            .session-meta {
+                margin-top: 10px;
+                font-size: 14px;
+                color: var(--disabled-text-color);
+            }
+
+            .meta-block {
+                margin-right: 10px;
+            }
+
+            .session-meta-icon {
+                --iron-icon-height: 18px;
+                --iron-icon-width: 18px;
+            }
+
+            .lang {
+                margin: 5px 0 0 10px;
+                text-transform: uppercase;
+                font-size: 12px;
+                color: var(--secondary-text-color);
+            }
+
+            .speaker {
+                color: var(--secondary-text-color);
+            }
+
+            .speaker-img {
+                margin-right: 10px;
+                height: 30px;
+                width: 30px;
+            }
+
+            @media (max-width: 600px) {
+                .container {
+                    padding: 40px 0;
+                }
+                .sessions-wrapper {
+                    padding: 10px 0;
+                    background: #fff;
+                    box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12), 0 3px 1px -2px rgba(0, 0, 0, 0.2);
+                }
+                .session-dialog-wrapper {
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    right: 0;
+                    bottom: 0;
+                    padding: 0;
+                    margin: 0;
+                }
+            }
+
+            @media (min-width: 601px) {
+                .schedule {
+                    margin-top: 10px;
+                }
+                .tracks-header {
+                    margin-top: 5px;
+                    color: var(--secondary-text-color);
+                    text-transform: uppercase;
+                }
+                .start-time {
+                    margin: 15px 10px;
+                    font-size: 20px;
+                    font-weight: 300;
+                }
+                .timeslot {
+                    margin-bottom: 10px;
+                }
+                .track {
+                    width: 30px;
+                }
+                .track-dot span {
+                    margin-left: 4px;
+                }
+                .session {
+                    margin: 0 10px;
+                    box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12), 0 3px 1px -2px rgba(0, 0, 0, 0.2);
+                }
+                .sub-session {
+                    padding: 20px 16px;
+                    border-top: 3px solid;
+                }
+                .session-dialog-wrapper {
+                    width: 50%;
+                    min-height: 90% !important;
+                    max-height: 90% !important;
+                }
+            }
+        </style>
+        <div id="schedule" class="container flex layout vertical">
+            <paper-tabs class="schedule-tabs" selected="{{selected}}">
+                <template is="dom-repeat" items="[[schedule]]" as="day">
+                    <paper-tab>[[day.dateReadable]]</paper-tab>
+                </template>
+            </paper-tabs>
+
+            <iron-pages class="schedule" selected="{{selected}}">
+                <template is="dom-repeat" items="[[schedule]]" as="day">
+                    <div>
+                        <div class="tracks-header layout horizontal" hidden$="[[smallScreen]]">
+                            <template is="dom-repeat" items="[[day.tracks]]" as="track">
+                                <div class="layout horizontal center-center flex">
+                                    <iron-icon class="session-meta-icon" icon="room"></iron-icon>
+                                    <span>[[track.title]]</span>
+                                </div>
+                            </template>
+                        </div>
+                        <template is="dom-repeat" items="[[day.timeslots]]" as="timeslot">
+                            <div class="timeslot layout vertical">
+                                <div class="start-time">
+                                    <iron-icon class="schedule-icon" icon="schedule"></iron-icon>
+                                    <span>[[timeslot.startTime]]</span>
+                                </div>
+                                <div class="sessions-wrapper layout vertical-horizontal flex">
+                                    <template is="dom-repeat" items="[[timeslot.sessions]]" as="session">
+                                        <div class="session layout vertical flex">
+                                            <template is="dom-repeat" items="[[session]]" as="subSession">
+                                                <div class$="[[ _concatClass('sub-session layout horizontal', subSession.mainTag) ]]" on-tap="_sessionTap">
+                                                    <div class="track track-dot">
+                                                        <span class$="[[subSession.mainTag]]"></span>
+                                                    </div>
+                                                    <div class="session-detail layout vertical flex">
+                                                        <div class="layout horizontal">
+                                                            <h4 class="session-title flex">[[subSession.title]]</h4>
+                                                            <span class="lang">[[subSession.language]]</span>
+                                                        </div>
+                                                        <template is="dom-repeat" items="[[subSession.speakers]]" as="speaker">
+                                                            <div class="speaker layout horizontal">
+                                                                <iron-image src="[[speaker.photoUrl]]" class="speaker-img placeholder-color img-circle" preload="" fade="" sizing="cover"></iron-image>
+                                                                <div class="person-detail flex layout vertical center-center">
+                                                                    <span class="name self-start">[[speaker.name]]</span>
+                                                                </div>
+                                                            </div>
+                                                        </template>
+                                                        <div class="session-meta layout horizontal">
+                                                            <div class="meta-block">
+                                                                <iron-icon class="session-meta-icon" icon="restore"></iron-icon>
+                                                                <span>[[subSession.endTime]]</span>
+                                                            </div>
+                                                            <div class="meta-block" hidden$="[[!smallScreen]]">
+                                                                <iron-icon class="session-meta-icon" icon="room"></iron-icon>
+                                                                <span>[[subSession.track.title]]</span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </template>
+                                        </div>
+                                    </template>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+                </template>
+            </iron-pages>
+        </div>
+
+        <paper-dialog id="sessionDialog" class="session-dialog-wrapper" with-backdrop="" modal$="{{smallScreen}}" on-iron-overlay-opened="_patchOverlay" entry-animation="scale-up-animation" exit-animation="fade-out-animation">
+            <session-dialog session="{{selectedSession}}" opened="{{opened}}"></session-dialog>
+        </paper-dialog>
+        <iron-media-query query="(max-width: 600px)" query-matches="{{smallScreen}}"></iron-media-query>
+    </template>
+</dom-module>
+
+<script>
+    Polymer({
+        is: 'schedule-block',
+        properties: {
+            schedule: {
+                type: Array
+            },
+            sessions: {
+                type: Array
+            },
+            selected: {
+                type: Number,
+                value: 0
+            },
+            opened: {
+                type: Boolean,
+                observer: '_openedChanged'
+            }
+        },
+        observers: [
+            'checkUrlParams(schedule, sessions)'
+        ],
+        checkUrlParams: function(schedule, sessions) {
+            if (app.params && app.params.id) {
+                var session = app.findByPropertyValue(sessions, 'id', app.params.id);
+                if (session) {
+                    this.async(function() {
+                        this._openSession(session);
+                    });
+                }
+            }
+        },
+        _concatClass: function(basic, target) {
+            return basic + ' ' + target;
+        },
+        _sessionTap: function() {
+            page.redirect('/schedule/' + event.model.subSession.id);
+            this._openSession(event.model.subSession);
+        },
+        _openSession: function(session) {
+            this.selectedSession = session;
+            this.opened = true;
+            this.$.sessionDialog.open();
+        },
+        _openedChanged: function() {
+            // page('/schedule');
+            this.$.sessionDialog.close();
+        },
+        _patchOverlay: function(e) {
+            if (e.target.withBackdrop) {
+                e.target.parentNode.insertBefore(e.target._backdrop, e.target);
+            }
+        }
+    });
+</script>
+<dom-module id="session-dialog" assetpath="session-dialog/">
+    <template>
+        <style include="tags-color"></style>
+        <style>
+            :host {
+                display: block;
+            }
+
+            paper-scroll-header-panel {
+                background: #fff;
+                height: 100%;
+                --paper-scroll-header-panel-full-header: {
+                    background-color: var(--default-primary-color);
+                }
+                ;
+                --paper-scroll-header-panel-condensed-header: {
+                    background-color: var(--default-primary-color);
+                }
+                ;
+            }
+
+            paper-toolbar {
+                background-color: transparent;
+                color: #fff;
+            }
+
+            paper-toolbar .title {
+                margin: 0;
+            }
+
+            .card-content {
+                background: #fff;
+                padding: 16px;
+                color: var(--primary-text-color);
+            }
+
+            .session-description {
+                padding-top: 0;
+                padding-bottom: 0;
+            }
+
+            .meta-info {
+                font-size: 14px;
+                color: var(--disabled-text-color);
+            }
+
+            .meta-block {
+                margin-right: 15px;
+            }
+
+            .session-meta-icon {
+                --iron-icon-height: 18px;
+                --iron-icon-width: 18px;
+            }
+
+            .speaker,
+            .speakers-info {
+                color: var(--secondary-text-color);
+            }
+
+            .speaker-img {
+                margin-right: 10px;
+                height: 30px;
+                width: 30px;
+            }
+
+            .block-header {
+                margin-bottom: 10px;
+                font-weight: 400;
+                font-size: 16px;
+                color: var(--secondary-text-color);
+            }
+        </style>
+        <paper-scroll-header-panel id="scrollHeaderPanel" class$="[[_concatClass('fit', '')]]" condenses="" keep-condensed-header="">
+            <paper-toolbar class="tall">
+                <paper-icon-button class="back-button" on-tap="_close" icon="arrow-back"></paper-icon-button>
+                <div id="title" class="bottom title">[[session.title]]</div>
+            </paper-toolbar>
+            <div class="content flex">
+                <div class="card-content meta-info layout horizontal">
+                    <div class="meta-block">
+                        <iron-icon class="session-meta-icon" icon="schedule"></iron-icon>
+                        <span>[[session.startTime]]</span> -
+                        <span>[[session.endTime]]</span>
+                    </div>
+                    <div class="meta-block" hidden$="[[!smallScreen]]">
+                        <iron-icon class="session-meta-icon" icon="room"></iron-icon>
+                        <span>[[session.track.title]]</span>
+                    </div>
+                    <template is="dom-if" if="[[session.language]]">
+                        <div class="meta-block" hidden$="[[!smallScreen]]">
+                            <iron-icon class="session-meta-icon" icon="font-download"></iron-icon>
+                            <span>[[session.language]]</span>
+                        </div>
+                    </template>
+                </div>
+                <div class="card-content session-description">
+                    <marked-element markdown="[[session.description]]"></marked-element>
+                </div>
+                <template is="dom-if" if="[[session.speakers]]">
+                    <div class="card-content">
+                        <h4 class="block-header">Speakers</h4>
+                        <template is="dom-repeat" items="[[session.speakers]]" as="speaker">
+                            <div class="speaker layout horizontal">
+                                <iron-image src="[[speaker.photoUrl]]" class="speaker-img placeholder-color img-circle" preload="" fade="" sizing="cover"></iron-image>
+                                <div class="person-detail flex layout vertical center-center">
+                                    <span class="name self-start">[[speaker.name]]</span>
+                                </div>
+                            </div>
+                            <marked-element class="speakers-info" markdown="[[speaker.bio]]"></marked-element>
+                        </template>
+                    </div>
+                </template>
+            </div>
+        </paper-scroll-header-panel>
+    </template>
+    <script>
+        Polymer({
+            is: 'session-dialog',
+            properties: {
+                session: {
+                    type: Object
+                },
+                opened: {
+                    type: Boolean,
+                    notify: true
+                }
+            },
+            ready: function() {
+                var title = this.$.title;
+                addEventListener('paper-header-transform', function(e) {
+                    var d = e.detail;
+                    var m = d.height - d.condensedHeight;
+                    var transform = 50 * d.y / m;
+                    Polymer.Base.transform('translate3d(' + transform + 'px,0,0)', title);
+                });
+            },
+            _concatClass: function(basic, target) {
+                return basic + ' ' + target;
+            },
+            _close: function() {
+                this.opened = false;
+            }
+        });
+    </script>
+</dom-module>
 </div></body></html>

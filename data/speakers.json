@@ -1,5 +1,6 @@
 [{
     "id": 1,
+    "featured": true,
     "name": "Surma",
     "title": "Developer Programs Engineer",
     "company": "Google",
@@ -17,6 +18,7 @@
     }]
 }, {
     "id": 2,
+    "featured": true,
     "name": "Tim Roes",
     "title": "Android- & Web-Developer",
     "company": "inovex GmbH",
@@ -41,6 +43,7 @@
     }]
 }, {
     "id": 3,
+    "featured": true,
     "name": "Kim Hogeling",
     "title": "Web Developer",
     "company": "shopping24 internet group",
@@ -64,6 +67,7 @@
     }]
 }, {
     "id": 4,
+    "featured": true,
     "name": "Aygul Zagidullina",
     "title": "",
     "company": "Todoist",
@@ -88,6 +92,7 @@
     }]
 }, {
     "id": 5,
+    "featured": true,
     "name": "Hasan Hosgel",
     "title": "Android Developer",
     "company": "Kitchen Stories / AJNS New Media GmbH",
@@ -115,6 +120,7 @@
     }]
 }, {
     "id": 6,
+    "featured": true,
     "name": "André Tietz",
     "title": "Android Developer",
     "company": "myTaxi (Intelligent Apps GmbH)",
@@ -139,6 +145,7 @@
     }]
 }, {
     "id": 7,
+    "featured": true,
     "name": "Martin Liersch",
     "title": "Freelance Android Developer",
     "company": "Paradise Android",
@@ -157,6 +164,7 @@
     }]
 }, {
     "id": 8,
+    "featured": true,
     "name": "Moath Qasim",
     "title": "Software Engineer",
     "company": "LOVOO",
@@ -173,4 +181,44 @@
         "name": "LinkedIn",
         "link": "https://www.linkedin.com/pub/mo-ath-qasim/57/a3b/17b"
     }]
+}, {
+    "id": 9,
+    "featured": true,
+    "name": "Maike Krüger",
+    "title": "Mobile Test Engineer",
+    "company": "Kupferwerk GmbH",
+    "country": "Germany",
+    "photoUrl": "../../images/people/Maike_Krueger.png",
+    "bio": "Having started with Android development at Kupferwerk, Maike decided to shift into an area of mobile development which is often underestimated and disregarded: Automated Mobile Testing. High quality apps as well as great usability and user experience now are the focus of her attention. She also is the co-organizer of the 'GDG Regensburg'.",
+    "tags": ["Android"],
+    "badges": [{
+        "name": "GDG",
+        "description": "GDG Regensburg",
+        "link": "https://plus.google.com/105059823716723829232/"
+    }],
+    "socials": [{
+        "name": "Google+",
+        "link": "https://plus.google.com/104994582136550694372/"
+    }]
+}, {
+    "id": 10,
+    "featured": true,
+    "name": "Manuela Pfeifer Anastacio",
+    "title": "Strategic Partner Manager for Mobile Apps",
+    "company": "Google",
+    "country": "UK",
+    "photoUrl": "../../images/people/manuela.jpg",
+    "bio": "Manuela is a Strategic Partner Manager for Mobile Apps at Google, with more than 9 years of online advertising experience. In her current job she is partnering closely with german speaking startups, helping them build a successful app business. She also manages a global research panel of mobile app developer at Google.",
+    "tags": ["Android"],
+    "badges": []
+}, {
+    "id": 11,
+    "featured": true,
+    "name": "Jens Kühlers",
+    "title": "Cloud Platform Sales Engineer",
+    "company": "Google",
+    "country": "Germany",
+    "photoUrl": "../../images/people/android.jpg",
+    "bio": "",
+    "tags": ["Cloud"]
 }]

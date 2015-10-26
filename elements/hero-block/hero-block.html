@@ -12,39 +12,35 @@
                 ;
                 color: #4E4E4E;
             }
-
+            paper-tab {
+                flex: none;
+                padding: 0 10px;
+            }
             .nav-link {
                 color: inherit;
             }
-
             .logo {
                 margin-top: 7px;
                 height: 40px;
             }
-
             .container {
                 padding-top: 0;
                 padding-bottom: 20px;
             }
-
             ::content .hero {
                 padding-bottom: 20px;
             }
-
             ::content .top-section {
                 padding-top: 20px;
                 font-size: 20px;
             }
-
             ::content h3 {
                 font-size: 2.1em;
             }
-
             ::content .logo {
                 height: 100px;
                 max-width: 100%;
             }
-
             ::content .slogan,
             ::content .dates {
                 margin-top: 20px;
@@ -54,34 +50,28 @@
                 letter-spacing: .09em;
                 line-height: 1;
             }
-
             ::content .description {
                 margin-top: 20px;
             }
-
             ::content .links {
                 margin: 40px 0 10px;
             }
-
             ::content .event-image {
                 width: 100%;
                 height: 100%;
             }
-
             ::content .right-section {
                 margin-top: 20px;
                 height: 200px;
             }
-
-            @media (max-width: 767px) {
+            @media (max-width: 600px) {
                 ::content .center-content-xs {
                     @apply(--layout-vertical);
                     @apply(--layout-center);
                     text-align: center;
                 }
             }
-
-            @media (min-width: 768px) {
+            @media (min-width: 601px) {
                 ::content .hero {
                     padding-top: 40px;
                 }
@@ -98,19 +88,30 @@
                 <paper-toolbar>
                     <paper-icon-button class="visible-xs" icon="menu" on-tap="togglePanel"></paper-icon-button>
                     <div class="flex hidden-xs">
-                        <a data-route="home" href="/" hidden="{{hideLogo}}">
-                            <img class="logo" src="../../images/GDG_DevFest_Hamburg_2015_white.png" alt="GDG DevFest 2015">
+                        <a data-route="home" href="/" hidden$="{{hideLogo}}">
+                            <img class="logo" src="../../images/logo-white.svg" alt="GDG DevFest 2015">
                         </a>
                     </div>
                     <paper-tabs class="hidden-xs" attr-for-selected="data-route" selected="{{route}}">
-                        <paper-tab class="text-u-c">
-                            <a data-route="blog" href="#!/blog" class="nav-link horizontal center-center layout">Blog</a>
+                        <paper-tab class="text-u-c" link>
+                            <a data-route="blog" href="#!/blog" class="nav-link horizontal center-center layout">
+                                Blog
+                            </a>
                         </paper-tab>
-                        <paper-tab class="text-u-c">
-                            <a data-route="speakers" href="#!/speakers" class="nav-link horizontal center-center layout">Speakers</a>
+                        <paper-tab class="text-u-c" link>
+                            <a data-route="schedule" href="#!/schedule" class="nav-link horizontal center-center layout">
+                                Schedule
+                            </a>
                         </paper-tab>
-                        <paper-tab class="text-u-c">
-                            <a data-route="team" href="#!/team" class="nav-link horizontal center-center layout">Team</a>
+                        <paper-tab class="text-u-c" link>
+                            <a data-route="speakers" href="#!/speakers" class="nav-link horizontal center-center layout">
+                                Speakers
+                            </a>
+                        </paper-tab>
+                        <paper-tab class="text-u-c" link>
+                            <a data-route="team" href="#!/team" class="nav-link horizontal center-center layout">
+                                Team
+                            </a>
                         </paper-tab>
                         <!-- <paper-tab class="text-u-c">
                             <a data-route="contact" href="#!/contact" class="nav-link horizontal center-center layout">Contact</a>

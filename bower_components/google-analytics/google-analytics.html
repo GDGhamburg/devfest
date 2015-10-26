@@ -1,30 +1,6 @@
-<link rel="import" href="../polymer/polymer.html">
-
-  <script>
-		(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-      (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-      m=s.getElementsByTagName('link')[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-      })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
-
-    Polymer({
-      is: 'google-analytics',
-      properties: {
-        code: {
-          type: String,
-          value: 'UA-XXXXX-Y'
-        },
-        displayfeatures: {
-          type: Boolean,
-          value: false
-        }
-      },
-      ready: function() {
-        ga('create', this.code, 'auto');
-
-        if (this.displayfeatures)
-          ga('require', 'displayfeatures');
-
-        ga('send', 'pageview');
-      }
-    });
-  </script>
+<!-- Load all google-analytics elements. -->
+<link rel="import" href="google-analytics-query.html">
+<link rel="import" href="google-analytics-chart.html">
+<link rel="import" href="google-analytics-view-selector.html">
+<link rel="import" href="google-analytics-date-selector.html">
+<link rel="import" href="google-analytics-dashboard.html">

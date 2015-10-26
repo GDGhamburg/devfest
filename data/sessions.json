@@ -1,5 +1,50 @@
 [
   {
+    "id": 1001,
+    "title": "Open Doors / Registration",
+    "description": "Get your badge, coffee, enjoy talking with tech addicts around",
+    "language": "",
+    "complexity": "",
+    "presentation": "",
+    "video": ""
+  },
+  {
+    "id": 1002,
+    "title": "Lunch",
+    "description": "Foooooooood!",
+    "language": "",
+    "complexity": "",
+    "presentation": "",
+    "video": ""
+  },
+  {
+    "id": 1003,
+    "title": "Coffee break",
+    "description": "Coffeeeeeee!",
+    "language": "",
+    "complexity": "",
+    "presentation": "",
+    "video": ""
+  },
+  {
+    "id": 1004,
+    "title": "Closing",
+    "description": "Goodbye!",
+    "language": "",
+    "complexity": "",
+    "presentation": "",
+    "video": ""
+  },
+  {
+    "id": 100,
+    "title": "Keynote",
+    "description": "",
+    "language": "en",
+    "complexity": "Intermediate",
+    "presentation": "",
+    "video": ""
+  },
+  {
     "id": 101,
     "title": "There’s an Polymer Element for that — but what if there isn't?",
     "description": "You have your own service. It has a very nice API. Is there Polymer an element for that? Probably not! In this session we’ll talk about patterns that occur when writing your own elements while wrapping an API or while writing new visual elements.",
@@ -7,7 +52,10 @@
     "language": "en",
     "complexity": "Intermediate",
     "presentation": "",
-    "video": ""
+    "video": "",
+    "tags": [
+        "Web"
+    ]
   },
   {
     "id": 102,
@@ -17,7 +65,10 @@
     "language": "en",
     "complexity": "Expert",
     "presentation": "",
-    "video": ""
+    "video": "",
+    "tags": [
+        "Web"
+    ]
   },
   {
     "id": 103,
@@ -27,7 +78,10 @@
     "language": "en",
     "complexity": "Intermediate",
     "presentation": "",
-    "video": ""
+    "video": "",
+    "tags": [
+        "Web"
+    ]
   },
   {
     "id": 104,
@@ -37,7 +91,10 @@
     "language": "en",
     "complexity": "Beginner",
     "presentation": "",
-    "video": ""
+    "video": "",
+    "tags": [
+        "Community"
+    ]
   },
   {
     "id": 105,
@@ -47,7 +104,10 @@
     "language": "en",
     "complexity": "Intermediate",
     "presentation": "",
-    "video": ""
+    "video": "",
+    "tags": [
+        "Android"
+    ]
   },
   {
     "id": 106,
@@ -57,7 +117,10 @@
     "language": "en",
     "complexity": "Intermediate",
     "presentation": "",
-    "video": ""
+    "video": "",
+    "tags": [
+        "Android"
+    ]
   },
   {
     "id": 107,
@@ -67,7 +130,10 @@
     "language": "en",
     "complexity": "Expert",
     "presentation": "",
-    "video": ""
+    "video": "",
+    "tags": [
+        "Cloud"
+    ]
   },
   {
     "id": 108,
@@ -77,6 +143,48 @@
     "language": "en",
     "complexity": "Intermediate",
     "presentation": "",
-    "video": ""
+    "video": "",
+    "tags": [
+        "Android"
+    ]
+  },
+  {
+    "id": 109,
+    "title": "Why you want to automate your mobile testing process",
+    "description": "Automated Testing nowadays is an essential part of software development and is getting increasingly popular in mobile development. Automating unit tests is quite common these days, however automated UI testing  provides you with more reasonable test results, since it is performed on the same user interface your daily user is confronted with. Integrating automated UI testing into your daily business enables you to detect problems in software early on, which provides you with permanent control over an ongoing development process. Furthermore automated UI testing allows you to speed up your development cycle which will lead to swifter detection of regressions in development and therefore helps to lower the overall cost of software development. This session aims to introduce the audience to the field of automated testing by giving a short overview of this particular subject and some useful tools. It takes a critical look at the status quo, the benefits and possible complications of automated testing.",
+    "speakers": [9],
+    "language": "en",
+    "complexity": "Intermediate",
+    "presentation": "",
+    "video": "",
+    "tags": [
+        "Android"
+    ]
+  },
+  {
+    "id": 110,
+    "title": "Recipe for a successful App Business",
+    "description": "With thousands of apps being published in the apps stores daily, how can you make sure your app is standing out? This talk will provide you with tips, tools and insights on how to capture more, engaged & loyal users and help you build and grow a successful apps business.",
+    "speakers": [10],
+    "language": "en",
+    "complexity": "Beginner",
+    "presentation": "",
+    "video": "",
+    "tags": [
+        "Android"
+    ]
+  },
+  {
+    "id": 111,
+    "title": "Google Cloud Platform",
+    "description": "TBA",
+    "speakers": [11],
+    "language": "en",
+    "complexity": "",
+    "presentation": "",
+    "video": "",
+    "tags": [
+        "Cloud"
+    ]
   }
 ]

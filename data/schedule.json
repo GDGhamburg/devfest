@@ -1,0 +1,75 @@
+[{
+    "date": "2015-11-06",
+    "dateReadable": "November 06",
+    "tracks": [{
+        "title": "Ground Floor"
+    }, {
+        "title": "1. Floor"
+    }],
+    "timeslots": [{
+        "startTime": "09:00",
+        "endTime": "10:00",
+        "sessions": [
+            [1001]
+        ]
+    }, {
+        "startTime": "10:00",
+        "endTime": "11:00",
+        "sessions": [
+            [100]
+        ]
+    }, {
+        "startTime": "11:00",
+        "endTime": "11:45",
+        "sessions": [
+            [103],
+            [110]
+        ]
+    }, {
+        "startTime": "12:00",
+        "endTime": "12:45",
+        "sessions": [
+            [104]
+        ]
+    }, {
+        "startTime": "12:45",
+        "endTime": "14:00",
+        "sessions": [
+            [1002]
+        ]
+    }, {
+        "startTime": "14:00",
+        "endTime": "14:45",
+        "sessions": [
+            [111],
+            [105]
+        ]
+    }, {
+        "startTime": "15:00",
+        "endTime": "15:45",
+        "sessions": [
+            [107],
+            [109]
+        ]
+    }, {
+        "startTime": "16:45",
+        "endTime": "16:30",
+        "sessions": [
+            [1003]
+        ]
+    }, {
+        "startTime": "16:30",
+        "endTime": "17:15",
+        "sessions": [
+            [102],
+            [108]
+        ]
+    }, {
+        "startTime": "17:30",
+        "endTime": "18:15",
+        "sessions": [
+            [101],
+            [106]
+        ]
+    }]
+}]

@@ -1,28 +1,33 @@
 {
   "name": "google-analytics",
-  "version": "0.1.0",
-  "homepage": "https://github.com/cesarwbr/google-analytics-element",
+  "version": "1.2.1",
+  "description": "Encapsulates Google Analytics dashboard features into web components",
+  "homepage": "https://googlewebcomponents.github.io/google-analytics",
   "authors": [
-    "Cesar William <cesarwbr@gmail.com>"
+    "Philip Walton <philip@philipwalton.com>"
   ],
-  "description": "Web Component wrapper for Google Analytics code using Polymer",
-  "main": "src/google-analytics.html",
+  "main": "google-analytics.html",
+  "license": "Apache2",
   "keywords": [
+    "google",
+    "analytics",
+    "dashboard",
     "polymer",
-    "google",
-    "analytics",
-    "google",
-    "analytics",
-    "google-analytics",
+    "web-component",
     "web-components"
   ],
-  "license": "MIT",
   "ignore": [
-    "**/.*",
-    "node_modules",
-    "bower_components"
+    "/.*",
+    "/test/"
   ],
   "dependencies": {
-    "polymer": "Polymer/polymer#^1.0.0"
+    "polymer": "Polymer/polymer#^1.0.0",
+    "promise-polyfill": "PolymerLabs/promise-polyfill#^1.0.0",
+    "ga-api-utils": "googleanalytics/javascript-api-utils#^0.2.0",
+    "google-chart": "GoogleWebComponents/google-chart#^1.0.0",
+    "google-signin": "GoogleWebComponents/google-signin#^1.0.0"
+  },
+  "devDependencies": {
+    "iron-component-page": "PolymerElements/iron-component-page#^1.0.2"
   }
 }
