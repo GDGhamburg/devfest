@@ -29,7 +29,8 @@
         "startTime": "12:00",
         "endTime": "12:45",
         "sessions": [
-            [104]
+            [104],
+            [112]
         ]
     }, {
         "startTime": "12:45",
