@@ -30,7 +30,18 @@
         "logos": [{
             "name": "Xing",
             "url": "http://xing.com",
-            "logoUrl": "../images/partners/xing.jpg"
+            "logoUrl": "../images/partners/xing.svg"
+        }]
+    }, {
+        "title": "Other sponsors",
+        "logos": [{
+            "name": "ICNH",
+            "url": "http://icnh.de",
+            "logoUrl": "../images/partners/icnh.svg"
+        }, {
+            "name": "JetBrains",
+            "url": "http://jetbrains.com",
+            "logoUrl": "../images/partners/jetbrains.png"
         }]
     }
 ]

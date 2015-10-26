@@ -14,23 +14,24 @@
         ]
     }, {
         "startTime": "10:00",
-        "endTime": "11:00",
+        "endTime": "10:45",
         "sessions": [
-            [100]
+            [103],
+            [110]
         ]
     }, {
         "startTime": "11:00",
         "endTime": "11:45",
         "sessions": [
-            [103],
-            [110]
+            [112],
+            [113]
         ]
     }, {
         "startTime": "12:00",
         "endTime": "12:45",
         "sessions": [
             [104],
-            [112]
+            [114]
         ]
     }, {
         "startTime": "12:45",

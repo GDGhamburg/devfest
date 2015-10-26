@@ -218,7 +218,60 @@
     "title": "Cloud Platform Sales Engineer",
     "company": "Google",
     "country": "Germany",
+    "photoUrl": "../../images/people/jens.jpg",
+    "bio": "Jens is a solutions engineer for Google's Cloud Platform, helping customers and prospects finding the products and systems which fulfill their needs and allow them scale efficiently. Jens has 8 ​years of experience working in Google. He started as a Network Engineer working on Google's global production infrastructure and spent 2 years on Infrastructure projects in Emerging Markets at Google Ghana. Before working for Google, Jens worked in technical teams at the United Nations and a local ISP in Germany",
+    "tags": ["Cloud"]
+}, {
+    "id": 12,
+    "featured": true,
+    "name": "Marvin Ramin",
+    "title": "Android Developer",
+    "company": "myTaxi (Intelligent Apps GmbH)",
+    "country": "Germany",
     "photoUrl": "../../images/people/android.jpg",
     "bio": "",
-    "tags": ["Cloud"]
+    "tags": ["Android"]
+}, {
+    "id": 13,
+    "featured": true,
+    "name": "Martin Reinhardt",
+    "title": "IT Architect",
+    "company": "Holisticon.de",
+    "country": "Germany",
+    "photoUrl": "../../images/people/martin_reinhard.png",
+    "bio": "I'm working as IT Architect and enjoy playing with new technologies. I'm addicted to TDD and Continous Delivery ;) <br><br>In my free time I like to meet new people, my friends and also doing some sports and sailing.",
+    "tags": ["Web"],
+    "socials": [{
+        "name": "Website",
+        "link": "http://kekz-box.de/en/"
+    }, {
+        "name": "Twitter",
+        "link": "http://twitter.com/mreinhardt"
+    }, {
+        "name": "GitHub",
+        "link": "https://github.com/hypery2k"
+    }]
+},  {
+    "id": 14,
+    "featured": true,
+    "name": "Serj Lotutovici",
+    "title": "Android Developer",
+    "company": "Xing",
+    "country": "Germany",
+    "photoUrl": "../../images/people/serj.jpg",
+    "bio": "",
+    "tags": ["Android"],
+    "bio": "",
+    "badges": [{
+        "name": "GDG",
+        "description": "GDG Hamburg Android",
+        "link": "https://plus.google.com/107859748046093089218"
+    }],
+    "socials": [{
+        "name": "Google+",
+        "link": "https://google.com/+LotutoviciSerj"
+    }, {
+        "name": "Twitter",
+        "link": "https://twitter.com/SLotutovici"
+    }]
 }]
