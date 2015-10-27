@@ -9,6 +9,15 @@
     "video": ""
   },
   {
+    "id": 1006,
+    "title": "Welcome",
+    "description": "Hi",
+    "language": "en",
+    "complexity": "",
+    "presentation": "",
+    "video": ""
+  },
+  {
     "id": 1002,
     "title": "Lunch",
     "description": "Foooooooood!",
@@ -30,17 +39,17 @@
     "id": 1004,
     "title": "Closing",
     "description": "Goodbye!",
-    "language": "",
+    "language": "en",
     "complexity": "",
     "presentation": "",
     "video": ""
   },
   {
-    "id": 100,
-    "title": "Keynote",
-    "description": "",
-    "language": "en",
-    "complexity": "Intermediate",
+    "id": 1005,
+    "title": "After Party",
+    "description": "Beeeeeeeeer!",
+    "language": "",
+    "complexity": "",
     "presentation": "",
     "video": ""
   },
@@ -176,11 +185,11 @@
   },
   {
     "id": 111,
-    "title": "Google Cloud Platform",
-    "description": "TBA",
+    "title": "Containers at Google (and Kubernetes)",
+    "description": "Google has been using Container-Technologies for a long time. After a brief dive into the history of container technologies at Google the talk covers what is now possible with Docker containers on Google Cloud Platform, talking about App Engine, Kubernetes and the Google Container Engine.",
     "speakers": [11],
     "language": "en",
-    "complexity": "",
+    "complexity": "Beginner",
     "presentation": "",
     "video": "",
     "tags": [
@@ -189,8 +198,20 @@
   },
   {
     "id": 112,
+    "title": "Responsive Testing with Galen",
+    "description": "It’s a pain for testers and developers. Running an application with different browsers. Resize the browser window and verify that the web page is working on different screen size. Due to “Responsive Design” there are high efforts on this kind of stuff.<br><br>Sure it’s possible to calculate the delta between images to ensure that the layout does not differ between the last checks. But especially when you build up a new application or start a new design this approach doesn’t really work out. Here comes the Galen Framework to the rescue: Describe like in TDD you’re requirements in a DSL and let the framework verify it for you. The Galen DSL uses relations between elements to describe your checks. For test execution the Selenium automation stack is used. So you can even utilize Saucelabs. And the  Galen Framework can be used in Java– und JavaScript projects. Additionally Galen delivers impressive reports for analyzing the failures.",
+    "speakers": [13],
+    "language": "en",
+    "complexity": "Intermediate",
+    "presentation": "",
+    "video": "",
+    "tags": ["Web"]
+  },
+  {
+    "id": 113,
     "title": "TBA",
     "description": "TBA",
+    "speakers": [12],
     "language": "",
     "complexity": "",
     "presentation": "",
@@ -198,5 +219,100 @@
     "tags": [
         "Android"
     ]
+  },
+  {
+    "id": 114,
+    "title": "Embracing the OK stack - A non-Square perspective",
+    "description": "Nowadays, its all about performance. We struggle to get our apps faster, smarter and less greedy when it comes to battery and data consumption. And don't forget all this has to be shipped in a nice and tiny package (I'm talking about you DEX limit). With so much jibber-jabber about what is good for you and what you should fear, as if it was pure poison, in this wasteland of false streams and broken connections there is hope to make things OK. This talk is about how to make the right decision when developing the data and network layers for your app(s). We will dive into the core of modern high and low level HTTP clients such as Retrofit and OkHttp. And see what makes them so efficient and why the OK stack is the right choice for you, no matter if you are writing a messaging app or designing a public sdk.",
+    "speakers": [14],
+    "language": "en",
+    "complexity": "Intermediate",
+    "presentation": "",
+    "video": "",
+    "tags": [
+        "Android"
+    ]
+  },
+
+  {
+    "id": 201,
+    "title": "",
+    "description": "",
+    "language": "",
+    "complexity": "",
+    "presentation": "",
+    "video": ""
+  },
+  {
+    "id": 202,
+    "title": "",
+    "description": "",
+    "language": "",
+    "complexity": "",
+    "presentation": "",
+    "video": ""
+  },
+  {
+    "id": 203,
+    "title": "",
+    "description": "",
+    "language": "",
+    "complexity": "",
+    "presentation": "",
+    "video": ""
+  },
+  {
+    "id": 204,
+    "title": "",
+    "description": "",
+    "language": "",
+    "complexity": "",
+    "presentation": "",
+    "video": ""
+  },
+  {
+    "id": 205,
+    "title": "",
+    "description": "",
+    "language": "",
+    "complexity": "",
+    "presentation": "",
+    "video": ""
+  },
+  {
+    "id": 206,
+    "title": "",
+    "description": "",
+    "language": "",
+    "complexity": "",
+    "presentation": "",
+    "video": ""
+  },
+  {
+    "id": 207,
+    "title": "",
+    "description": "",
+    "language": "",
+    "complexity": "",
+    "presentation": "",
+    "video": ""
+  },
+  {
+    "id": 208,
+    "title": "",
+    "description": "",
+    "language": "",
+    "complexity": "",
+    "presentation": "",
+    "video": ""
+  },
+  {
+    "id": 209,
+    "title": "",
+    "description": "",
+    "language": "",
+    "complexity": "",
+    "presentation": "",
+    "video": ""
   }
 ]
