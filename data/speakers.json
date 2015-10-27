@@ -261,7 +261,6 @@
     "photoUrl": "../../images/people/serj.jpg",
     "bio": "Serj is an Android Developer at XING. He is responsible for the framework part that drives the XING Main App, along side other mobile products. He is known for his passion for clean and sustainable code. DI is his middle name, Jenkins is his best friend and he eats Gradle for lunch. You will never hear him showing-of a feature, but he will not miss an opportunity to tell you about 'this cool new library' or 'this awesome design pattern'.",
     "tags": ["Android"],
-    "bio": "",
     "badges": [{
         "name": "GDG",
         "description": "GDG Hamburg Android",
