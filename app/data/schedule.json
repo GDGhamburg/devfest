@@ -1,6 +1,6 @@
 [{
     "date": "2015-11-06",
-    "dateReadable": "November 06",
+    "dateReadable": "Conference 6/11",
     "tracks": [{
         "title": "Ground Floor"
     }, {
@@ -14,23 +14,24 @@
         ]
     }, {
         "startTime": "10:00",
-        "endTime": "11:00",
+        "endTime": "10:45",
         "sessions": [
-            [100]
+            [103],
+            [110]
         ]
     }, {
         "startTime": "11:00",
         "endTime": "11:45",
         "sessions": [
-            [103],
-            [110]
+            [112],
+            [113]
         ]
     }, {
         "startTime": "12:00",
         "endTime": "12:45",
         "sessions": [
             [104],
-            [112]
+            [114]
         ]
     }, {
         "startTime": "12:45",
@@ -71,6 +72,54 @@
         "sessions": [
             [101],
             [106]
+        ]
+    }, {
+        "startTime": "18:30",
+        "endTime": "18:45",
+        "sessions": [
+            [1004]
+        ]
+    }, {
+        "startTime": "18:45",
+        "endTime": "22:00",
+        "sessions": [
+            [1005]
+        ]
+    }]
+},
+{
+    "date": "2015-11-05",
+    "dateReadable": "Codelabs 5/11",
+    "tracks": [{
+        "title": "Ground Floor"
+    }, {
+        "title": "1. Floor"
+    }, {
+        "title": "TBA"
+    }],
+    "timeslots": [{
+        "startTime": "14:00",
+        "endTime": "15:45",
+        "sessions": [
+            [201],
+            [202],
+            [203]
+        ]
+    }, {
+        "startTime": "16:00",
+        "endTime": "17:45",
+        "sessions": [
+            [204],
+            [205],
+            [206]
+        ]
+    }, {
+        "startTime": "18:00",
+        "endTime": "19:45",
+        "sessions": [
+            [207],
+            [208],
+            [209]
         ]
     }]
 }]
