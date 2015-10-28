@@ -134,22 +134,4 @@
         "name": "Website",
         "link": "http://www.mthie.com"
     }]
-}, {
-    "id": 8,
-    "name": "Björn Jensen",
-    "title": "",
-    "chapter": "GDG Hamburg Android",
-    "company": "",
-    "country": "",
-    "photoUrl": "../../images/people/bjoern.jpg",
-    "bio": "",
-    "tags": [],
-    "badges": [],
-    "socials": [{
-        "name": "Google+",
-        "link": "https://google.com/+BjörnJensen_hh"
-    }, {
-        "name": "Twitter",
-        "link": "http://twitter.com/mirouhh"
-    }]
 }]
