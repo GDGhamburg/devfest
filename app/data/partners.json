@@ -33,6 +33,13 @@
             "logoUrl": "../images/partners/xing.svg"
         }]
     }, {
+        "title": "Gold sponsor",
+        "logos": [{
+            "name": "myTaxi",
+            "url": "http://mytaxi.de",
+            "logoUrl": "../images/partners/mytaxi.png"
+        }]
+    }, {
         "title": "Other sponsors",
         "logos": [{
             "name": "ICNH",
