@@ -228,8 +228,8 @@
     "title": "Android Developer",
     "company": "myTaxi (Intelligent Apps GmbH)",
     "country": "Germany",
-    "photoUrl": "../../images/people/android.jpg",
-    "bio": "",
+    "photoUrl": "../../images/people/marvin.jpg",
+    "bio": "Marvin is an Android developer at mytaxi in Hamburg. There he makes the city just that little bit smarter and easier to navigate by developing the car2go app. He has a huge passion for the Android platform, clean code, and an eye for design. If there is something new, cool out in the Android world, he will try it out and just because it's in 'BETA' doesn't mean you can't write a sample app with it!",
     "tags": ["Android"]
 }, {
     "id": 13,
@@ -261,7 +261,6 @@
     "photoUrl": "../../images/people/serj.jpg",
     "bio": "Serj is an Android Developer at XING. He is responsible for the framework part that drives the XING Main App, along side other mobile products. He is known for his passion for clean and sustainable code. DI is his middle name, Jenkins is his best friend and he eats Gradle for lunch. You will never hear him showing-of a feature, but he will not miss an opportunity to tell you about 'this cool new library' or 'this awesome design pattern'.",
     "tags": ["Android"],
-    "bio": "",
     "badges": [{
         "name": "GDG",
         "description": "GDG Hamburg Android",
@@ -273,5 +272,180 @@
     }, {
         "name": "Twitter",
         "link": "https://twitter.com/SLotutovici"
+    }]
+}, {
+    "id": 15,
+    "featured": false,
+    "name": "Björn Jensen",
+    "title": "",
+    "company": "",
+    "country": "",
+    "photoUrl": "../../images/people/bjoern.jpg",
+    "bio": "",
+    "tags": ["Android"],
+    "badges": [{
+        "name": "GDG",
+        "description": "GDG Hamburg Android",
+        "link": "https://plus.google.com/107859748046093089218"
+    }],
+    "socials": [{
+        "name": "Google+",
+        "link": "https://google.com/+BjörnJensen_hh"
+    }, {
+        "name": "Twitter",
+        "link": "http://twitter.com/mirouhh"
+    }]
+}, {
+    "id": 16,
+    "featured": false,
+    "name": "Sandro Kock",
+    "title": "Mobile Developer",
+    "company": "SSV Software Systems GmbH",
+    "country": "Germany",
+    "photoUrl": "../../images/people/sandro.jpeg",
+    "bio": "Since 2014 Sandro Kock is a mobile developer at SSV Software Systems, responsible for developing mobile solutions, with a focus on IoT/M2M. Before that he wrote the MQTT client MQTTlens for the GSOC 2014, which is based on Polymer.",
+    "tags": ["Web"],
+    "badges": [],
+    "socials": [{
+        "name": "MQTT-Elements",
+        "link": "https://github.com/mqttjs/mqtt-elements"
+    }]
+}, {
+    "id": 17,
+    "featured": false,
+    "name": "Martin Thielecke",
+    "title": "Developer",
+    "company": "veeseo",
+    "country": "Germany",
+    "photoUrl": "../../images/people/martin.jpg",
+    "bio": "",
+    "tags": ["Cloud"],
+    "badges": [{
+        "name": "GDG",
+        "description": "GDG Hamburg Golang",
+        "link": "https://developers.google.com/groups/chapter/103545472040309738031/"
+    }],
+    "socials": [{
+        "name": "Google+",
+        "link": "https://google.com/+MartinThielecke"
+    }, {
+        "name": "Website",
+        "link": "http://www.mthie.com"
+    }]
+}, {
+    "id": 18,
+    "featured": false,
+    "name": "Matthias Friedrich",
+    "title": "Android Developer",
+    "company": "Jimdo",
+    "country": "Germany",
+    "photoUrl": "../../images/people/matthias.jpg",
+    "bio": "As Android user from the beginning, he started to develop for the platform with version 1.6 in 2009. Since then he is following its progress very enthusiastically and worked on several applications, big and small, successful in the Play Store and as specialized customer solutions . During these years, he also co-founded the GDG Bremen and GDG Hamburg Android, gave several Android related talks and organized developer events around Google technologies in general.",
+    "tags": ["Android"],
+    "badges": [{
+        "name": "GDG",
+        "description": "GDG Hamburg Android",
+        "link": "https://plus.google.com/107859748046093089218"
+    }],
+    "socials": [{
+        "name": "Google+",
+        "link": "https://google.com/+MatthiasFriedrich"
+    }, {
+        "name": "Twitter",
+        "link": "https://twitter.com/mtthsfrdrch"
+    }, {
+        "name": "GitHub",
+        "link": "https://github.com/mtthsfrdrch"
+    }]
+}, {
+    "id": 19,
+    "featured": false,
+    "name": "Daniel Hartwich",
+    "title": "Junior Android Developer",
+    "company": "Xing",
+    "country": "Germany",
+    "photoUrl": "../../images/people/android.jpg",
+    "bio": "",
+    "tags": ["Android"],
+    "badges": [],
+    "socials": [{
+        "name": "Google+",
+        "link": "https://google.com/+DanielHartwich1"
+    }]
+}, {
+    "id": 20,
+    "featured": false,
+    "name": "Frank Thelen",
+    "title": "",
+    "company": "Hamburg Web Performance Meetup (sponsored by Holisticon und Telefónica)",
+    "country": "",
+    "photoUrl": "../../images/people/frank_thelen.jpg",
+    "bio": "Frank Thelen ist Senior Projektmanager bei Telefónica Germany. Dort kümmert er sich um Web Performance. Außerdem beschäftigt er sich mit Requirements Analysis, Scrum und Test Management. Als Lead-Entwickler in arbeitete er zudem in Web-Projekten, z.B. einem Online-Shop, der auf dem  MEAN.js-Stack basiert.",
+    "tags": ["Web"],
+    "badges": [],
+    "socials": [{
+        "name": "Xing",
+        "link": "https://www.xing.com/profile/Frank_Thelen6"
+    }]
+}, {
+    "id": 21,
+    "featured": false,
+    "name": "Jan Weinschenker",
+    "title": "",
+    "company": "Hamburg Web Performance Meetup (sponsored by Holisticon und Telefónica)",
+    "country": "",
+    "photoUrl": "../../images/people/jan_weinschenker.jpg",
+    "bio": "Jan Weinschenker ist bei Holisticon AG als Consultant im Geschäftsfeld Architektur tätig. Er beschäftigte sich in den letzten Jahren mit Dokumenten- und Content Management-Systemen. Zudem arbeitete er an Webseiten auf Java-Basis sowohl im Backend als auch im Frontend. Er hat darüber hinaus Erfahrungen in den Bereichen Software-Lifecycle-Management und Software-Qualitätsanalyse. Hier sowohl auf dem Gebiet klassischer Enterprise-Anwendungen, als auch bei der Entwicklung von Anwendungen für mobile Geräte.",
+    "tags": ["Web"],
+    "badges": [],
+    "socials": [{
+        "name": "Twitter",
+        "link": "@janweinschenker"
+    },{
+        "name": "Xing",
+        "link": "https://www.xing.com/profile/Jan_Weinschenker"
+    }]
+}, {
+    "id": 22,
+    "featured": false,
+    "name": "Oliver Ochs",
+    "title": "",
+    "company": "Hamburg Web Performance Meetup (sponsored by Holisticon und Telefónica)",
+    "country": "",
+    "photoUrl": "../../images/people/oliver.jpg",
+    "bio": "Oliver Ochs ist bei Holisticon AG in der Leitung des Geschäftsfelds Architektur tätig. Er ist ein Frontend-Op, der sich als Full-Stack-Developer in Java und JS an der Schnittstelle zwischen UI und Backend am wohlsten fühlt.",
+    "tags": ["Web"],
+    "badges": [],
+    "socials": [{
+        "name": "Twitter",
+        "link": "https://twitter.com/oochs"
+    },{
+        "name": "Xing",
+        "link": "https://www.xing.com/profile/Oliver_Ochs"
+    }]
+}, {
+    "id": 23,
+    "featured": false,
+    "name": "Ingo Oeser",
+    "title": "Developer",
+    "company": "veeseo",
+    "country": "Germany",
+    "photoUrl": "../../images/people/ingo.png",
+    "bio": "Night owl who loves reading lots of code, science fiction and fantasy. Writing Go code for fun and profit.",
+    "tags": ["Cloud"],
+    "badges": [{
+        "name": "GDG",
+        "description": "GDG Hamburg Golang",
+        "link": "https://developers.google.com/groups/chapter/103545472040309738031/"
+    }],
+    "socials": [{
+        "name": "Google+",
+        "link": "https://google.com/+IngoOeser"
+    }, {
+        "name": "GitHub",
+        "link": "https://github.com/nightlyone"
+    }, {
+        "name": "Twitter",
+        "link": "https://twitter.com/nightlyone"
     }]
 }]

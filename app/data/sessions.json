@@ -209,11 +209,11 @@
   },
   {
     "id": 113,
-    "title": "TBA",
-    "description": "TBA",
+    "title": "The Android 'Data Binding Library' - Don't be scared of your XMLs!",
+    "description": "At Google I/O 2015 Google came out and announced the 'Data Binding Library' for Android. It wants to put 'code' into your XMLs. And that isn't necessarily a bad thing! While still in Beta, there are already many interesting points to take away from this Library that show us that Google does indeed care about the architecture in your apps!<br><br>This talk will show you how the Data Binding Library works and how you can work with it. We will see how to use it and take a look into the land of generated code to see what powers the library internally.",
     "speakers": [12],
-    "language": "",
-    "complexity": "",
+    "language": "en",
+    "complexity": "Beginner",
     "presentation": "",
     "video": "",
     "tags": [
@@ -236,57 +236,81 @@
 
   {
     "id": 201,
-    "title": "",
+    "title": "CODELAB: Polymer",
     "description": "",
-    "language": "",
-    "complexity": "",
+    "speakers": [16],
+    "language": "en",
+    "complexity": "Beginner",
     "presentation": "",
-    "video": ""
+    "video": "",
+    "tags": [
+        "Web"
+    ]
   },
   {
     "id": 202,
-    "title": "",
-    "description": "",
-    "language": "",
-    "complexity": "",
+    "title": "CODELAB: Gradle Quick Start",
+    "description": "TBA",
+    "speakers": [15],
+    "language": "en",
+    "complexity": "Beginner",
     "presentation": "",
-    "video": ""
+    "video": "",
+    "tags": [
+        "Android"
+    ]
   },
   {
     "id": 203,
-    "title": "",
+    "title": "CODELAB: Google AppEngine with Python",
     "description": "",
-    "language": "",
-    "complexity": "",
+    "speakers": [17],
+    "language": "en",
+    "complexity": "Beginner",
     "presentation": "",
-    "video": ""
+    "video": "",
+    "tags": [
+        "Cloud"
+    ]
   },
   {
     "id": 204,
-    "title": "",
-    "description": "",
-    "language": "",
-    "complexity": "",
+    "title": "CODELAB: Hands-on Performance - Eine Einführung in Web Performance",
+    "description": "Performance Matters: Eine schnell ladende Website ist nicht nur für eine optimale User Experience - auch in langsamen Mobilfunknetzen - sondern auf für SEO wichtig. Doch wie gut steht die eigene Site da? Begleitet Frank, Jan und Oliver dabei, wenn sie  schnell und mit einfachen Mitteln Bottlenecks in Websites suchen.<br><br>Dieser Workshop fokussiert sich auf Tools zur Web Performance-Analyse (Google Chrome Dev Tools, Google PageSpeed Insights, WebPagetest), die jeder Teilnehmer selbst ausprobieren wird. Ein Notebook mit installiertem Google Chrome-Browser und eine Internetverbindung sind daher Voraussetzung für die Teilnahme an diesem Workshop.",
+    "speakers": [20, 21, 22],
+    "language": "de",
+    "complexity": "Beginner",
     "presentation": "",
-    "video": ""
+    "video": "",
+    "tags": [
+        "Web"
+    ]
   },
   {
     "id": 205,
-    "title": "",
+    "title": "CODELAB: Building a Material Design App",
     "description": "",
-    "language": "",
-    "complexity": "",
+    "speakers": [18],
+    "language": "en",
+    "complexity": "Beginner",
     "presentation": "",
-    "video": ""
+    "video": "",
+    "tags": [
+        "Android"
+    ]
   },
   {
     "id": 206,
-    "title": "",
+    "title": "CODELAB: Golang (Part I)",
     "description": "",
+    "speakers": [23],
     "language": "",
-    "complexity": "",
+    "complexity": "Beginner",
     "presentation": "",
-    "video": ""
+    "video": "",
+    "tags": [
+        "Cloud"
+    ]
   },
   {
     "id": 207,
@@ -299,20 +323,28 @@
   },
   {
     "id": 208,
-    "title": "",
+    "title": "CODELAB: Eddystone on Android",
     "description": "",
-    "language": "",
-    "complexity": "",
+    "speakers": [19],
+    "language": "en",
+    "complexity": "Intermediate",
     "presentation": "",
-    "video": ""
+    "video": "",
+    "tags": [
+        "Android"
+    ]
   },
   {
     "id": 209,
-    "title": "",
+    "title": "CODELAB: Golang (Part II)",
     "description": "",
+    "speakers": [23],
     "language": "",
-    "complexity": "",
+    "complexity": "Beginner",
     "presentation": "",
-    "video": ""
+    "video": "",
+    "tags": [
+        "Cloud"
+    ]
   }
 ]
