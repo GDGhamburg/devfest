@@ -428,7 +428,7 @@
     "country": "Germany",
     "photoUrl": "../../images/people/ingo.png",
     "bio": "Night owl who loves reading lots of code, science fiction and fantasy. Writing Go code for fun and profit.",
-    "tags": ["Go"],
+    "tags": ["Cloud"],
     "badges": [{
         "name": "GDG",
         "description": "GDG Hamburg Golang",
