@@ -228,8 +228,8 @@
     "title": "Android Developer",
     "company": "myTaxi (Intelligent Apps GmbH)",
     "country": "Germany",
-    "photoUrl": "../../images/people/android.jpg",
-    "bio": "",
+    "photoUrl": "../../images/people/marvin.jpg",
+    "bio": "Marvin is an Android developer at mytaxi in Hamburg. There he makes the city just that little bit smarter and easier to navigate by developing the car2go app. He has a huge passion for the Android platform, clean code, and an eye for design. If there is something new, cool out in the Android world, he will try it out and just because it's in 'BETA' doesn't mean you can't write a sample app with it!",
     "tags": ["Android"]
 }, {
     "id": 13,
@@ -298,14 +298,18 @@
 }, {
     "id": 16,
     "featured": false,
-    "name": "TBA",
-    "title": "",
-    "company": "",
-    "country": "",
-    "photoUrl": "../../images/people/android.jpg",
-    "bio": "",
+    "name": "Sandro Kock",
+    "title": "Mobile Developer",
+    "company": "SSV Software Systems GmbH",
+    "country": "Germany",
+    "photoUrl": "../../images/people/sandro.jpeg",
+    "bio": "Since 2014 Sandro Kock is a mobile developer at SSV Software Systems, responsible for developing mobile solutions, with a focus on IoT/M2M. Before that he wrote the MQTT client MQTTlens for the GSOC 2014, which is based on Polymer.",
     "tags": ["Web"],
-    "badges": []
+    "badges": [],
+    "socials": [{
+        "name": "MQTT-Elements",
+        "link": "https://github.com/mqttjs/mqtt-elements"
+    }]
 }, {
     "id": 17,
     "featured": false,

@@ -209,11 +209,11 @@
   },
   {
     "id": 113,
-    "title": "TBA",
-    "description": "TBA",
+    "title": "The Android 'Data Binding Library' - Don't be scared of your XMLs!",
+    "description": "At Google I/O 2015 Google came out and announced the 'Data Binding Library' for Android. It wants to put 'code' into your XMLs. And that isn't necessarily a bad thing! While still in Beta, there are already many interesting points to take away from this Library that show us that Google does indeed care about the architecture in your apps!<br><br>This talk will show you how the Data Binding Library works and how you can work with it. We will see how to use it and take a look into the land of generated code to see what powers the library internally.",
     "speakers": [12],
-    "language": "",
-    "complexity": "",
+    "language": "en",
+    "complexity": "Beginner",
     "presentation": "",
     "video": "",
     "tags": [
