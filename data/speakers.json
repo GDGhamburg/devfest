@@ -11,9 +11,11 @@
     "badges": [],
     "socials": [{
         "name": "Google+",
+        "icon": "app-icons:gplus",
         "link": "https://plus.google.com/+AlexanderSurma"
     }, {
         "name": "Twitter",
+        "icon": "app-icons:twitter",
         "link": "https://twitter.com/surmair"
     }]
 }, {
@@ -33,12 +35,15 @@
     }],
     "socials": [{
         "name": "Website",
+        "icon": "link",
         "link": "https://www.timroes.de"
     }, {
         "name": "Twitter",
+        "icon": "app-icons:twitter",
         "link": "https://twitter.com/tim_roes"
     }, {
         "name": "Google+",
+        "icon": "app-icons:gplus",
         "link": "https://plus.google.com/+TimRoes"
     }]
 }, {
@@ -54,15 +59,19 @@
     "badges": [],
     "socials": [{
         "name": "Website",
+        "icon": "link",
         "link": "https://developer.s24.com/"
     }, {
         "name": "Website",
+        "icon": "link",
         "link": "http://www.s24.com/"
     }, {
         "name": "Twitter",
+        "icon": "app-icons:twitter",
         "link": "https://twitter.com/KimHogeling"
     }, {
         "name": "GitHub",
+        "icon": "app-icons:github",
         "link": "https://github.com/kimhogeling"
     }]
 }, {
@@ -82,12 +91,15 @@
     }],
     "socials": [{
         "name": "Website",
+        "icon": "link",
         "link": "http://www.aygul.de"
     }, {
         "name": "Google+",
+        "icon": "app-icons:gplus",
         "link": "https://plus.google.com/+AygulZagidullina"
     }, {
         "name": "LinkedIn",
+        "icon": "app-icons:linkedin",
         "link": "https://www.linkedin.com/in/aygulzagidullina"
     }]
 }, {
@@ -107,15 +119,19 @@
     }],
     "socials": [{
         "name": "Google+",
+        "icon": "app-icons:gplus",
         "link": "https://plus.google.com/+HasanHosgel"
     }, {
         "name": "Twitter",
+        "icon": "app-icons:twitter",
         "link": "https://twitter.com/alosdev"
     }, {
         "name": "GitHub",
+        "icon": "app-icons:github",
         "link": "https://github.com/alosdev"
     }, {
         "name": "SpeakerDeck",
+        "icon": "app-icons:speakerdeck",
         "link": "https://speakerdeck.com/alosdev"
     }]
 }, {
@@ -135,12 +151,15 @@
     }],
     "socials": [{
         "name": "GitHub",
+        "icon": "app-icons:github",
         "link": "https://github.com/andretietz"
     }, {
         "name": "Google+",
+        "icon": "app-icons:gplus",
         "link": "https://plus.google.com/+AndréTietz/"
     }, {
         "name": "Twitter",
+        "icon": "app-icons:twitter",
         "link": "https://twitter.com/antietz"
     }]
 }, {
@@ -160,6 +179,7 @@
     }],
     "socials": [{
         "name": "Google+",
+        "icon": "app-icons:gplus",
         "link": "https://plus.google.com/+MartinLiersch"
     }]
 }, {
@@ -179,6 +199,7 @@
     }],
     "socials": [{
         "name": "LinkedIn",
+        "icon": "app-icons:linkedin",
         "link": "https://www.linkedin.com/pub/mo-ath-qasim/57/a3b/17b"
     }]
 }, {
@@ -198,6 +219,7 @@
     }],
     "socials": [{
         "name": "Google+",
+        "icon": "app-icons:gplus",
         "link": "https://plus.google.com/104994582136550694372/"
     }]
 }, {
@@ -243,12 +265,15 @@
     "tags": ["Web"],
     "socials": [{
         "name": "Website",
+        "icon": "link",
         "link": "http://kekz-box.de/en/"
     }, {
         "name": "Twitter",
+        "icon": "app-icons:twitter",
         "link": "http://twitter.com/mreinhardt"
     }, {
         "name": "GitHub",
+        "icon": "app-icons:github",
         "link": "https://github.com/hypery2k"
     }]
 },  {
@@ -268,9 +293,11 @@
     }],
     "socials": [{
         "name": "Google+",
+        "icon": "app-icons:gplus",
         "link": "https://google.com/+LotutoviciSerj"
     }, {
         "name": "Twitter",
+        "icon": "app-icons:twitter",
         "link": "https://twitter.com/SLotutovici"
     }]
 }, {
@@ -290,9 +317,11 @@
     }],
     "socials": [{
         "name": "Google+",
+        "icon": "app-icons:gplus",
         "link": "https://google.com/+BjörnJensen_hh"
     }, {
         "name": "Twitter",
+        "icon": "app-icons:twitter",
         "link": "http://twitter.com/mirouhh"
     }]
 }, {
@@ -327,9 +356,11 @@
     }],
     "socials": [{
         "name": "Google+",
+        "icon": "app-icons:gplus",
         "link": "https://google.com/+MartinThielecke"
     }, {
         "name": "Website",
+        "icon": "link",
         "link": "http://www.mthie.com"
     }]
 }, {
@@ -349,12 +380,15 @@
     }],
     "socials": [{
         "name": "Google+",
+        "icon": "app-icons:gplus",
         "link": "https://google.com/+MatthiasFriedrich"
     }, {
         "name": "Twitter",
+        "icon": "app-icons:twitter",
         "link": "https://twitter.com/mtthsfrdrch"
     }, {
         "name": "GitHub",
+        "icon": "app-icons:github",
         "link": "https://github.com/mtthsfrdrch"
     }]
 }, {
@@ -370,6 +404,7 @@
     "badges": [],
     "socials": [{
         "name": "Google+",
+        "icon": "app-icons:gplus",
         "link": "https://google.com/+DanielHartwich1"
     }]
 }, {
@@ -385,6 +420,7 @@
     "badges": [],
     "socials": [{
         "name": "Xing",
+        "icon": "link",
         "link": "https://www.xing.com/profile/Frank_Thelen6"
     }]
 }, {
@@ -400,9 +436,11 @@
     "badges": [],
     "socials": [{
         "name": "Twitter",
-        "link": "@janweinschenker"
+        "icon": "app-icons:twitter",
+        "link": "https://twitter.com/janweinschenker"
     },{
         "name": "Xing",
+        "icon": "link",
         "link": "https://www.xing.com/profile/Jan_Weinschenker"
     }]
 }, {
@@ -418,9 +456,11 @@
     "badges": [],
     "socials": [{
         "name": "Twitter",
+        "icon": "app-icons:twitter",
         "link": "https://twitter.com/oochs"
     },{
         "name": "Xing",
+        "icon": "link",
         "link": "https://www.xing.com/profile/Oliver_Ochs"
     }]
 }, {
@@ -440,12 +480,15 @@
     }],
     "socials": [{
         "name": "Google+",
+        "icon": "app-icons:gplus",
         "link": "https://google.com/+IngoOeser"
     }, {
         "name": "GitHub",
+        "icon": "app-icons:github",
         "link": "https://github.com/nightlyone"
     }, {
         "name": "Twitter",
+        "icon": "app-icons:twitter",
         "link": "https://twitter.com/nightlyone"
     }]
 }]
