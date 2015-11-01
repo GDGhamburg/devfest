@@ -237,7 +237,7 @@
   {
     "id": 201,
     "title": "CODELAB: Polymer",
-    "description": "",
+    "description": "Building applications declaratively, enables composition of components to form a business specific applications, that require almost no code.<br><br>This Codelab will help you building your first Polymer application and integrate existing APIs to form a complex web application. At first a short introduction into Polymer is given with a glimpse of what can be dome with it – not just building for the Web but for Mobile and Desktop.<br><br>To get started as fast as possible, each participant should have Git, Node.js, NPM and Bower installed. A good starting point is the Polymer-Starter-Kit (PSK) [1], which demonstrates how Polymer-Applications are structured, build and tested.<br><br>[1] https://github.com/PolymerElements/polymer-starter-kit",
     "speakers": [16],
     "language": "en",
     "complexity": "Beginner",
@@ -263,7 +263,7 @@
   {
     "id": 203,
     "title": "CODELAB: Google AppEngine with Python",
-    "description": "",
+    "description": "TBA",
     "speakers": [17],
     "language": "en",
     "complexity": "Beginner",
@@ -289,7 +289,7 @@
   {
     "id": 205,
     "title": "CODELAB: Building a Material Design App",
-    "description": "",
+    "description": "Material design is a comprehensive guide for visual, motion, and interaction design across platforms and devices. In this codelab, you’ll learn the principles of this design language by building a sample Android app.<br><br>What you’ll learn<br>- How to use the Android Design Support Library.<br>- How to apply material design to your Android app.<br>- The following key material design components and principles:<br>&emsp;- Themes and colors to create tangible surfaces and print-like design<br>&emsp;- App layout best practices for improved navigability<br>&emsp;- Animation and touch feedback to express meaningful motion.<br><br>What you’ll need<br>- Android Studio [1] version 1.4+ and JDK 7+ [2]<br>- Experience developing Android Apps<br>- A test device with Android 4.1+<br>- A USB micro to USB cable.<br><br>Android devices running Android 2.3.3 (Gingerbread, API Level 10) or higher may be used, however, some material design effects, such as the ripple effect, will not be visible on devices running on Android 4.4 (KitKat) or before.<br><br>[1] https://developer.android.com/sdk/installing/studio.html<br>[2] http://www.oracle.com/technetwork/java/javase/downloads/jdk7-downloads-1880260.html",
     "speakers": [18],
     "language": "en",
     "complexity": "Beginner",
@@ -314,16 +314,16 @@
   },
   {
     "id": 207,
-    "title": "",
-    "description": "",
-    "language": "",
-    "complexity": "",
+    "title": "CODELAB: Dagger 2",
+    "speakers": [6, 24],
+    "language": "en",
+    "complexity": "Intermediate",
     "presentation": "",
     "video": ""
   },
   {
     "id": 208,
-    "title": "CODELAB: Eddystone on Android",
+    "title": "CODELAB: Eddystone on Android (Beacons)",
     "description": "",
     "speakers": [19],
     "language": "en",
@@ -345,6 +345,19 @@
     "video": "",
     "tags": [
         "Cloud"
+    ]
+  },
+  {
+    "id": 220,
+    "title": "",
+    "description": "",
+    "speakers": [6, 24],
+    "language": "en",
+    "complexity": "Intermediate",
+    "presentation": "",
+    "video": "",
+    "tags": [
+        "Android"
     ]
   }
 ]

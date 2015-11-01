@@ -8,9 +8,15 @@
     }],
     "timeslots": [{
         "startTime": "09:00",
-        "endTime": "10:00",
+        "endTime": "09:40",
         "sessions": [
             [1001]
+        ]
+    }, {
+        "startTime": "09:40",
+        "endTime": "09:55",
+        "sessions": [
+            [1006]
         ]
     }, {
         "startTime": "10:00",
@@ -54,7 +60,7 @@
             [109]
         ]
     }, {
-        "startTime": "16:45",
+        "startTime": "15:45",
         "endTime": "16:30",
         "sessions": [
             [1003]
