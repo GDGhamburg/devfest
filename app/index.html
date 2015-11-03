@@ -59,7 +59,7 @@
 <body id="body" unresolved class="fullbleed layout vertical">
     <span id="browser-sync-binding"></span>
     <template is="dom-bind" id="app">
-        <app-data speakers="{{speakers}}" sessions="{{sessions}}" posts="{{posts}}" partners="{{partners}}" schedule="{{schedule}}"></app-data>
+        <app-data team="{{team}}" speakers="{{speakers}}" sessions="{{sessions}}" posts="{{posts}}" partners="{{partners}}" schedule="{{schedule}}"></app-data>
         <paper-drawer-panel id="paperDrawerPanel" force-narrow>
             <paper-header-panel drawer class="drawer" mode="seamed">
                 <paper-toolbar class="tall">
@@ -191,7 +191,7 @@
                                     <!-- <paper-fab class="section-fab-right" icon="social:share"></paper-fab> -->
                                 </div>
                             </hero-block>
-                            <team-block id="team-block" class="container-atop" source="../../data/team.json"></team-block>
+                            <team-block id="team-block" class="container-atop" team="{{team}}"></team-block>
                             <footer-block></footer-block>
                         </section>
                         <section data-route="code-of-conduct">
