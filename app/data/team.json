@@ -10,12 +10,15 @@
     "badges": [],
     "socials": [{
         "name": "Google+",
+        "icon": "app-icons:gplus",
         "link": "https://plus.google.com/+MarcoPöhler"
     }, {
         "name": "Twitter",
+        "icon": "app-icons:twitter",
         "link": "https://twitter.com/mpoehler"
     }, {
         "name": "Website",
+        "icon": "link",
         "link": "http://www.kontaktlinsen-preisvergleich.de/"
     }]
 }, {
@@ -31,12 +34,15 @@
     "badges": [],
     "socials": [{
         "name": "Google+",
+        "icon": "app-icons:gplus",
         "link": "https://google.com/+MatthiasFriedrich"
     }, {
         "name": "Twitter",
+        "icon": "app-icons:twitter",
         "link": "https://twitter.com/mtthsfrdrch"
     }, {
         "name": "GitHub",
+        "icon": "app-icons:github",
         "link": "https://github.com/mtthsfrdrch"
     }]
 }, {
@@ -52,9 +58,11 @@
     "badges": [],
     "socials": [{
         "name": "Google+",
+        "icon": "app-icons:gplus",
         "link": "https://google.com/+LotutoviciSerj"
     }, {
         "name": "Twitter",
+        "icon": "app-icons:twitter",
         "link": "https://twitter.com/SLotutovici"
     }]
 }, {
@@ -70,12 +78,15 @@
     "badges": [],
     "socials": [{
         "name": "GitHub",
+        "icon": "app-icons:github",
         "link": "https://github.com/andretietz"
     }, {
         "name": "Google+",
+        "icon": "app-icons:gplus",
         "link": "https://plus.google.com/+AndréTietz/"
     }, {
         "name": "Twitter",
+        "icon": "app-icons:twitter",
         "link": "https://twitter.com/antietz"
     }]
 }, {
@@ -90,9 +101,11 @@
     "badges": [],
     "socials": [{
         "name": "Google+",
+        "icon": "app-icons:gplus",
         "link": "https://plus.google.com/110302548402901939726"
     }, {
         "name": "Twitter",
+        "icon": "app-icons:twitter",
         "link": "https://twitter.com/ingabreuer22"
     }]
 }, {
@@ -108,12 +121,15 @@
     "badges": [],
     "socials": [{
         "name": "Google+",
+        "icon": "app-icons:gplus",
         "link": "https://google.com/+IngoOeser"
     }, {
         "name": "GitHub",
+        "icon": "app-icons:github",
         "link": "https://github.com/nightlyone"
     }, {
         "name": "Twitter",
+        "icon": "app-icons:twitter",
         "link": "https://twitter.com/nightlyone"
     }]
 }, {
@@ -129,9 +145,11 @@
     "badges": [],
     "socials": [{
         "name": "Google+",
+        "icon": "app-icons:gplus",
         "link": "https://google.com/+MartinThielecke"
     }, {
         "name": "Website",
+        "icon": "link",
         "link": "http://www.mthie.com"
     }]
 }]
