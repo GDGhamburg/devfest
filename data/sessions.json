@@ -2,7 +2,7 @@
   {
     "id": 1001,
     "title": "Open Doors / Registration",
-    "description": "Get your badge, coffee, enjoy talking with tech addicts around",
+    "description": "Get your badge, shirt and coffee, enjoy talking with tech addicts around",
     "language": "",
     "complexity": "",
     "presentation": "",
@@ -235,6 +235,24 @@
   },
 
   {
+   "id": 2001,
+    "title": "Open Doors / Registration",
+    "description": "Get your badge and shirt, enjoy talking with tech addicts around",
+    "language": "en",
+    "complexity": "Beginner",
+    "presentation": "",
+    "video": ""
+  },
+  {
+    "id": 2002,
+    "title": "Welcome / Codelab Overview",
+    "description": "Short intro to all the planned codelabs",
+    "language": "en",
+    "complexity": "",
+    "presentation": "",
+    "video": ""
+  },
+  {
     "id": 201,
     "title": "CODELAB: Polymer",
     "description": "Building applications declaratively, enables composition of components to form a business specific applications, that require almost no code.<br><br>This Codelab will help you building your first Polymer application and integrate existing APIs to form a complex web application. At first a short introduction into Polymer is given with a glimpse of what can be dome with it – not just building for the Web but for Mobile and Desktop.<br><br>To get started as fast as possible, each participant should have Git, Node.js, NPM and Bower installed. A good starting point is the Polymer-Starter-Kit (PSK) [1], which demonstrates how Polymer-Applications are structured, build and tested.<br><br>[1] https://github.com/PolymerElements/polymer-starter-kit",
@@ -315,6 +333,7 @@
   {
     "id": 207,
     "title": "CODELAB: Dagger 2",
+    "description": "Getting started on Dependency Injection with Dagger2 isn't that easy for everyone.<br><br>In this codelab we'll guide you step by step to your first project running with dagger2. Starting with setting up the libraries, up until using dagger2 in a small example project we set up.<br><br>You should know, what dagger2 is and what you would use it for. Bring your Laptop and since we're limited on time, you should have your Android Studio up and running already.",
     "speakers": [6, 24],
     "language": "en",
     "complexity": "Intermediate",
@@ -324,7 +343,7 @@
   {
     "id": 208,
     "title": "CODELAB: Eddystone on Android (Beacons)",
-    "description": "",
+    "description": "Talking with Beacons from Android using the Nearby API",
     "speakers": [19],
     "language": "en",
     "complexity": "Intermediate",
@@ -345,19 +364,6 @@
     "video": "",
     "tags": [
         "Cloud"
-    ]
-  },
-  {
-    "id": 220,
-    "title": "",
-    "description": "",
-    "speakers": [6, 24],
-    "language": "en",
-    "complexity": "Intermediate",
-    "presentation": "",
-    "video": "",
-    "tags": [
-        "Android"
     ]
   }
 ]

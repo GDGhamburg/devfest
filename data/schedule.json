@@ -2,19 +2,19 @@
     "date": "2015-11-06",
     "dateReadable": "Conference 6/11",
     "tracks": [{
-        "title": "Ground Floor"
+        "title": "Café"
     }, {
-        "title": "1. Floor"
+        "title": "Coworking Area"
     }],
     "timeslots": [{
         "startTime": "09:00",
-        "endTime": "09:40",
+        "endTime": "09:30",
         "sessions": [
             [1001]
         ]
     }, {
-        "startTime": "09:40",
-        "endTime": "09:55",
+        "startTime": "09:30",
+        "endTime": "09:50",
         "sessions": [
             [1006]
         ]
@@ -97,13 +97,25 @@
     "date": "2015-11-05",
     "dateReadable": "Codelabs 5/11",
     "tracks": [{
-        "title": "Ground Floor"
+        "title": "Werkstatt"
     }, {
-        "title": "1. Floor"
+        "title": "Coworking Area"
     }, {
-        "title": "TBA"
+        "title": "Innospace"
     }],
     "timeslots": [{
+        "startTime": "13:00",
+        "endTime": "13:30",
+        "sessions": [
+            [2001]
+        ]
+    }, {
+        "startTime": "13:30",
+        "endTime": "13:50",
+        "sessions": [
+            [2002]
+        ]
+    }, {
         "startTime": "14:00",
         "endTime": "15:45",
         "sessions": [
