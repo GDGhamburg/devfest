@@ -268,9 +268,9 @@
   {
     "id": 202,
     "title": "CODELAB: Gradle Quick Start",
-    "description": "TBA",
+    "description": "Gradle bekommt als Buildtool einen immer größeren Stellenwert. Das liegt u.a. daran, dass der Einsatz von Gradle im Kontext der Android-Entwicklung immer beliebter wird.<br><br>Wir werfen hier einen ersten Blick auf Gradle und gehen gemeinsam die ersten Schritte mit Gradle, um dessen Anwendung zu verstehen. Erfahrung mit Gradle ist nicht nötig. Das Codelab richtet sich explizit an Einsteiger. Der Einsatz von Gradle bei der Android-Entwicklung wird ebenfalls nicht betrachtet.",
     "speakers": [15],
-    "language": "en",
+    "language": "de",
     "complexity": "Beginner",
     "presentation": "",
     "video": "",
@@ -342,8 +342,8 @@
   },
   {
     "id": 208,
-    "title": "CODELAB: Eddystone on Android (Beacons)",
-    "description": "Talking with Beacons from Android using the Nearby API",
+    "title": "CODELAB: Talking with Eddystone Beacons using Google’s Nearby API",
+    "description": "Earlier this year Google announced their system for talking to nearby beacons. Along with this system, they also introduced a format in which this beacons communicate with their environment, Eddystone. These two components play quite nicely with each other, which is why combining them makes sense. Using the Nearby API, your Android or iOS app can then detect nearby beacons and use your attachments to deliver users a magical proximity-aware experience.<br><br>In this Codelab we will explore Google’s Nearby API to talk to some Eddystone beacons and see what possible use cases for this technology exist.",
     "speakers": [19],
     "language": "en",
     "complexity": "Intermediate",
