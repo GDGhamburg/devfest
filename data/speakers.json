@@ -309,7 +309,7 @@
     "country": "Hamburg",
     "photoUrl": "../../images/people/bjoern.jpg",
     "bio": "Björn Jensen kommt aus der Smalltalk- & Java-Welt und ist seit vielen Jahren begeisterter Anhänger agiler Methoden. Die ersten Erfahrungen im agilen Kontext hat Björn 2000 mit eXtreme Programming gesammelt. Gerade der Einsatz von Werkzeugen zur Buildautomatisierung spielt immer eine große Rolle, ganz gleich, ob man sich in Scrum, Kanban oder anderen Komtexten bewegt. Und als Teamcoach ist Björn in diesem Kontext nach wie vor hands-on dabei.",
-    "tags": ["Teamcoach", "Developer", "DevOps", "Agile", "Lean"],
+    "tags": [],
     "badges": [{
         "name": "GDG",
         "description": "GDG Hamburg Android",
