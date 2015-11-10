@@ -60,7 +60,7 @@
     "speakers": [1],
     "language": "en",
     "complexity": "Intermediate",
-    "presentation": "",
+    "presentation": "https://speakerdeck.com/surma/what-if-there-isnt-1",
     "video": "",
     "tags": [
         "Web"
@@ -86,7 +86,7 @@
     "speakers": [2],
     "language": "en",
     "complexity": "Intermediate",
-    "presentation": "",
+    "presentation": "https://www.timroes.de/wp-content/uploads/2015/05/modernweb.pdf",
     "video": "",
     "tags": [
         "Web"
@@ -99,7 +99,7 @@
     "speakers": [4],
     "language": "en",
     "complexity": "Beginner",
-    "presentation": "",
+    "presentation": "http://bit.ly/devfesthh",
     "video": "",
     "tags": [
         "Community"
@@ -112,7 +112,7 @@
     "speakers": [7],
     "language": "en",
     "complexity": "Intermediate",
-    "presentation": "",
+    "presentation": "https://docs.google.com/presentation/d/1L49TcEx7xd29UtHMI8CiOvEzCq9D7Xj6GTDdAzMgiVs/edit?usp=sharing",
     "video": "",
     "tags": [
         "Android"
@@ -125,7 +125,7 @@
     "speakers": [5],
     "language": "en",
     "complexity": "Intermediate",
-    "presentation": "",
+    "presentation": "https://speakerdeck.com/alosdev/perfmatters-for-android",
     "video": "",
     "tags": [
         "Android"
@@ -138,7 +138,7 @@
     "speakers": [8],
     "language": "en",
     "complexity": "Expert",
-    "presentation": "",
+    "presentation": "http://www.slideshare.net/MoathQassem/microservices-in-golang",
     "video": "",
     "tags": [
         "Cloud"
@@ -151,7 +151,7 @@
     "speakers": [6],
     "language": "en",
     "complexity": "Intermediate",
-    "presentation": "",
+    "presentation": "http://andretietz.github.io/dagger2-introduction/",
     "video": "",
     "tags": [
         "Android"
@@ -214,7 +214,7 @@
     "speakers": [12],
     "language": "en",
     "complexity": "Beginner",
-    "presentation": "",
+    "presentation": "https://mauin.github.io/DevFestDatabinding/#/",
     "video": "",
     "tags": [
         "Android"
@@ -311,7 +311,7 @@
     "speakers": [18],
     "language": "en",
     "complexity": "Beginner",
-    "presentation": "",
+    "presentation": "http://www.code-labs.io/codelabs/material-design-style/index.html",
     "video": "",
     "tags": [
         "Android"
