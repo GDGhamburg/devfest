@@ -73,7 +73,7 @@
     "speakers": [3],
     "language": "en",
     "complexity": "Expert",
-    "presentation": "",
+    "presentation": "https://speakerdeck.com/kimhogeling/apps-gdg-devfest-hamburg-2015",
     "video": "",
     "tags": [
         "Web"
@@ -164,7 +164,7 @@
     "speakers": [9],
     "language": "en",
     "complexity": "Intermediate",
-    "presentation": "",
+    "presentation": "https://slidr.io/Maikeeefer/why-you-should-automate-your-mobile-testing-process#1",
     "video": "",
     "tags": [
         "Android"
@@ -177,7 +177,7 @@
     "speakers": [10],
     "language": "en",
     "complexity": "Beginner",
-    "presentation": "",
+    "presentation": "https://drive.google.com/file/d/0B5fLjsud2Jw0bTZKTHhVbHFOQjA/view?usp=sharing",
     "video": "",
     "tags": [
         "Android"
@@ -203,7 +203,7 @@
     "speakers": [13],
     "language": "en",
     "complexity": "Intermediate",
-    "presentation": "",
+    "presentation": "http://sokahh.github.io/presentations/galen_google-dev-fest-2015",
     "video": "",
     "tags": ["Web"]
   },
